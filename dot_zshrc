@@ -62,9 +62,6 @@ alias ls="eza --icons=always"
 alias cd="z"
 
 # chezmoi 相关
-alias czap="chezmoi apply"
-alias czad="chezmoi add"
+alias cz="chezmoi"
 alias cze="chezmoi edit"
-alias czd="chezmoi diff"
-alias czs="chezmoi status"
 
