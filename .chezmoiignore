@@ -6,3 +6,10 @@ wezterm/
 chezmoi/
 hammerspoon/
 git/
+
+{{- if ne .chezmoi.os "darwin" -}}
+dot_aerospace.toml
+dot_hammerspoon/
+{{- if ne .chezmoi.os "windows" }}
+dot_wezterm.lua
+{{- end -}}

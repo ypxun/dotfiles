@@ -64,3 +64,11 @@ set mouse=a             " Enable mouse usage (all modes)
 inoremap jj <Esc>
 syntax on        " 开启语法高亮
 filetype plugin indent on  " 启用文件类型检测，并加载对应的缩进和插件规则
+
+" 统一备份/撤销文件存放位置，避免目录里到处都是 .swp 和 .un~
+if !isdirectory($HOME . "/.vim/files/undo")
+    call mkdir($HOME . "/.vim/files/undo", "p")
+endif
+set undodir=~/.vim/files/undo
+set backupdir=~/.vim/files/backup
+set directory=~/.vim/files/swap

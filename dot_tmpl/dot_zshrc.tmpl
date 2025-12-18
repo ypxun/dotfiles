@@ -1,1 +1,17 @@
+# --- Chezmoi 动态注入 ---
+{{ if eq .chezmoi.os "darwin" -}}
+# macOS 特有：Homebrew 路径
+{{ if eq .chezmoi.arch "arm64" -}}
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ else -}}
+eval "$(/usr/local/bin/brew shellenv)"
+{{ end -}}
+{{ end -}}
+
+# --- 加载真身内容 ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
+
+# --- WSL 特有处理 ---
+{{ if (env "WSL_DISTRO_NAME") -}}
+# 可以在这里放一些 WSL 专有的 alias，比如打开 Windows 浏览器
+{{ end -}}

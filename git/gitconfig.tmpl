@@ -6,8 +6,12 @@
     defaultBranch = main
 
 [core]
-    pager = delta
+    # 根据系统自动切换换行符逻辑
+    {{- if eq .chezmoi.os "windows" }}
+    autocrlf = true
+    {{- else }}
     autocrlf = input
+    pager = delta
 
 [interactive]
     diffFilter = delta --color-only
