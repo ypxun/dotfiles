@@ -1,74 +1,71 @@
+" --- 1. 环境识别 ---
+let s:is_mac = has("macunix")
+let s:is_linux = has("unix") && !has("macunix")
+" 检测是否在纯 TTY 终端（无 GUI，如你的 Debian/Arch 终端界面）
+let s:is_tty = (empty($DISPLAY) && empty($WAYLAND_DISPLAY))
 
-" An example for a vimrc file.
-"
-" Maintainer:	The Vim Project <https://github.com/vim/vim>
-" Last Change:	2023 Aug 10
-" Former Maintainer:	Bram Moolenaar <Bram@vim.org>
-"
-" To use it, copy it to
-"	       for Unix:  ~/.vimrc
-"	      for Amiga:  s:.vimrc
-"	 for MS-Windows:  $VIM\_vimrc
-"	      for Haiku:  ~/config/settings/vim/vimrc
-"	    for OpenVMS:  sys$login:.vimrc
-
-" When started as "evim", evim.vim will already have done these settings, bail
-" out.
+" --- 2. 基础逻辑 (保留你原有的 evim 判断) ---
 if v:progname =~? "evim"
   finish
 endif
 
-" Get the defaults that most users want.
 source $VIMRUNTIME/defaults.vim
 
-if has("vms")
-  set nobackup		" do not keep a backup file, use versions instead
-else
-  set backup		" keep a backup file (restore to previous version)
-  if has('persistent_undo')
-    set undofile	" keep an undo file (undo changes after closing)
-  endif
+" --- 3. 备份与撤销 (优化你原有的目录逻辑) ---
+let s:vim_dir = $HOME . "/.vim/files"
+if !isdirectory(s:vim_dir . "/undo")
+    call mkdir(s:vim_dir . "/undo", "p")
+endif
+if !isdirectory(s:vim_dir . "/backup")
+    call mkdir(s:vim_dir . "/backup", "p")
+endif
+if !isdirectory(s:vim_dir . "/swap")
+    call mkdir(s:vim_dir . "/swap", "p")
 endif
 
-" if &t_Co > 2 || has("gui_running")
-"   " Switch on highlighting the last used search pattern.
-"   set hlsearch
-" endif
-
-" Put these in an autocmd group, so that we can delete them easily.
-augroup vimrcEx
-  au!
-
-  " For all text files set 'textwidth' to 78 characters.
-  autocmd FileType text setlocal textwidth=78
-augroup END
-
-" Add optional packages.
-"
-" The matchit plugin makes the % command work better, but it is not backwards
-" compatible.
-" The ! means the package won't be loaded right away but when plugins are
-" loaded during initialization.
-if has('syntax') && has('eval')
-  packadd! matchit
-endif
-set showcmd             " Show (partial) command in status line.
-set showmatch           " Show matching brackets.
-set ignorecase          " Do case insensitive matching
-set smartcase           " Do smart case matching
-set incsearch           " Incremental search
-set autowrite           " Automatically save before commands like :next and :make
-set hidden              " Hide buffers when they are abandoned
-set mouse=a             " Enable mouse usage (all modes)
-" 方案2：条件映射，只在连续快速按下 jj 时生效（防止误触）
-inoremap jj <Esc>
-syntax on        " 开启语法高亮
-filetype plugin indent on  " 启用文件类型检测，并加载对应的缩进和插件规则
-
-" 统一备份/撤销文件存放位置，避免目录里到处都是 .swp 和 .un~
-if !isdirectory($HOME . "/.vim/files/undo")
-    call mkdir($HOME . "/.vim/files/undo", "p")
-endif
 set undodir=~/.vim/files/undo
 set backupdir=~/.vim/files/backup
 set directory=~/.vim/files/swap
+
+" --- 4. 核心设置 ---
+set showcmd
+set showmatch
+set ignorecase
+set smartcase
+set incsearch
+set autowrite
+set hidden
+syntax on
+filetype plugin indent on
+
+" 快捷键
+inoremap jj <Esc>
+
+" --- 5. 跨平台/环境适配 ---
+if s:is_tty
+    " 纯 TTY 环境下：
+    set mouse=          " 禁用鼠标（TTY 下鼠标选中文本往往会干扰复制粘贴）
+    set t_Co=8          " 强制 8 色模式（如果 TTY 显示乱码）
+else
+    " GUI 终端下 (Mac/WezTerm 等)：
+    set mouse=a         " 开启全模式鼠标
+    if has("termguicolors")
+        set termguicolors " 开启真彩色支持
+    endif
+endif
+
+" 针对 Mac 的特殊优化
+if s:is_mac
+    " 设置 clipboard 为 unnamed 使得 Vim 与 Mac 系统剪贴板同步
+    set clipboard=unnamed
+endif
+
+" --- 6. 自动命令组 ---
+augroup vimrcEx
+  au!
+  autocmd FileType text setlocal textwidth=78
+augroup END
+
+if has('syntax') && has('eval')
+  packadd! matchit
+endif

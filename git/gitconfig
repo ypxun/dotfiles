@@ -1,16 +1,13 @@
 [user]
-    name = {{ .name | quote }}
-    email = {{ .email | quote }}
+    name = @GIT_NAME@
+    email = @GIT_EMAIL@
 
 [init]
     defaultBranch = main
 
 [core]
-    # 根据系统自动切换换行符逻辑
-    {{- if eq .chezmoi.os "windows" }}
-    autocrlf = true
-    {{- else }}
-    autocrlf = input
+    # 根据系统自动切换换行符逻辑 (由 Chezmoi 动态注入)
+    @GIT_CRLF@
     pager = delta
 
 [interactive]

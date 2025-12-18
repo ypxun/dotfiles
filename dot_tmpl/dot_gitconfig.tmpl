@@ -1,2 +1,11 @@
-{{- $content := include (joinPath .chezmoi.workingTree "git/gitconfig.tmpl") -}}
-{{- $content | replace "{{ .name | quote }}" (.name | quote) | replace "{{ .email | quote }}" (.email | quote) -}}
+{{- /* 1. 计算换行符逻辑 */ -}}
+{{- $crlf := "autocrlf = input" -}}
+{{- if eq .chezmoi.os "windows" -}}
+    {{- $crlf = "autocrlf = true" -}}
+{{- end -}}
+
+{{- /* 2. 读取真身内容 */ -}}
+{{- $raw_config := include (joinPath .chezmoi.workingTree "git/gitconfig") -}}
+
+{{- /* 3. 执行链式替换并输出 */ -}}
+{{- $raw_config | replace "@GIT_NAME@" (.name | quote) | replace "@GIT_EMAIL@" (.email | quote) | replace "@GIT_CRLF@" $crlf -}}

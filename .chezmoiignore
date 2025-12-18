@@ -7,9 +7,14 @@ chezmoi/
 hammerspoon/
 git/
 
-{{- if ne .chezmoi.os "darwin" -}}
-dot_aerospace.toml
-dot_hammerspoon/
-{{- if ne .chezmoi.os "windows" }}
-dot_wezterm.lua
-{{- end -}}
+# --- 2. 防止在不适用的平台上产生“空文件” ---
+# 只有那些在影子 .tmpl 里用了 {{ if }} 封装、且你不希望在其他平台看到“空壳”的文件才需要写：
+
+{{- if ne .chezmoi.os "darwin" }}
+.aerospace.toml
+.hammerspoon/
+{{- end }}
+
+{{- if and (ne .chezmoi.os "darwin") (ne .chezmoi.os "windows") }}
+.wezterm.lua
+{{- end }}

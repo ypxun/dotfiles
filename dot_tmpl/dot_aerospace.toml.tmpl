@@ -1,1 +1,3 @@
+{{- if eq .chezmoi.os "darwin" -}}
 {{ include (joinPath .chezmoi.workingTree "aerospace/config.toml") }}
+{{- end -}}
