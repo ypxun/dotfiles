@@ -1,0 +1,31 @@
+{{- $email := promptStringOnce . "email" "Email address" -}}
+{{- $name := promptStringOnce . "name" "User name" -}}
+
+[data]
+    email = {{ $email | quote }}
+    name = {{ $name | quote }}
+
+ignorePatterns = [
+  "*.secret", "*.key", "*.pem", "*.token",
+  "*.swp", "*.un~", "*~",
+  ".DS_Store", "Thumbs.db",
+  ".git", ".gitignore",
+  "node_modules", "venv", ".venv"
+]
+
+[edit]
+    command = "code"
+    args = ["--wait"]
+
+[diff]
+    command = "delta"
+
+[git]
+    autoCommit = true
+    autoPush = false
+
+[cd]
+    command = "zsh"
+
+[apply]
+    refreshPeriod = "1m"
