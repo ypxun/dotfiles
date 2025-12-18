@@ -25,7 +25,6 @@ ignorePatterns = [
     autoPush = false
 
 [cd]
-    command = "zsh"
-
+    command = {{ if eq .chezmoi.os "windows" }}"pwsh"{{ else }}"zsh"{{ end }}
 [apply]
     refreshPeriod = "1m"
