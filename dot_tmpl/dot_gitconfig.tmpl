@@ -1,2 +1,2 @@
-{{- $gitConfig := include (joinPath .chezmoi.workingTree "git/gitconfig.tmpl") -}}
-{{- renderTemplate $gitConfig . -}}
+{{- $content := include (joinPath .chezmoi.workingTree "git/gitconfig.tmpl") -}}
+{{- $content | replace "{{ .name | quote }}" (.name | quote) | replace "{{ .email | quote }}" (.email | quote) -}}
