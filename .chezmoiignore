@@ -1,6 +1,7 @@
+dot_tmpl/
 zsh/
 vim/
 aerospace/
 wezterm/
-chezmoi-config/
+chezmoi/
 hammerspoon/
