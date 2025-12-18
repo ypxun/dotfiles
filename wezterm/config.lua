@@ -13,7 +13,12 @@ local is_mac = wezterm.target_triple:find("apple") ~= nil
 -- --------------------------------------------------------------------
 config.initial_cols = 120
 config.initial_rows = 40
-config.font = wezterm.font('MesloLGS NF')
+-- 兼容 Mac 和 Windows 的字体设置
+config.font = wezterm.font_with_fallback({
+  "MesloLGS NF",         -- Mac 官方安装后的名字
+  "MesloLGS Nerd Font",  -- Windows Scoop 安装后的名字
+  "JetBrains Mono",      -- 保底
+})
 config.font_size = is_mac and 13 or 11 -- Mac 用 13，Win 用 11 视觉上更接近
 
 -- 去除标题栏 (Mac 下 RESIZE 很漂亮，Windows 下可能需要视情况调整)
