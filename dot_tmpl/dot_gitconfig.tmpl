@@ -1,1 +1,2 @@
-{{ template "git/gitconfig.tmpl" . }}
+{{- $gitConfig := include (joinPath .chezmoi.workingTree "git/gitconfig.tmpl") -}}
+{{- renderTemplate $gitConfig . -}}
