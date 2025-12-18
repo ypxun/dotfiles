@@ -1,0 +1,9 @@
+{{- if ne .chezmoi.os "darwin" }}
+.aerospace.toml
+.hammerspoon
+.hammerspoon/**
+{{- end }}
+
+{{- if and (ne .chezmoi.os "darwin") (ne .chezmoi.os "windows") }}
+.wezterm.lua
+{{- end }}
