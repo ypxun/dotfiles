@@ -73,8 +73,10 @@ config.keys = {
 -- 5. Windows 专有设置 (如默认启动 WSL)
 -- --------------------------------------------------------------------
 if is_windows then
-    -- 如果你想在 Windows 上默认打开 WSL，取消下面行的注释
-    -- config.default_prog = { 'wsl.exe' }
+    -- 强制指定 Windows 默认使用 PowerShell (pwsh)
+    -- 如果你安装了最新的 PowerShell 7，名字是 'pwsh.exe'
+    -- 如果是系统自带的蓝窗口 PowerShell，名字是 'powershell.exe'
+    config.default_prog = { 'pwsh.exe' }
 end
 
 return config
