@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Brewfile 哈希变动检测: {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
+echo "📦 检测到 Brewfile 变动，开始同步软件列表..."
+
+if [[ "$(uname)" == "Darwin" ]]; then
+    if command -v brew &> /dev/null; then
+        # 执行安装
+        # --no-upgrade: 仅安装缺失项，不更新已存在的包，速度极快
+        # --cleanup: 如果你从 Brewfile 删除了某项，apply 后它会自动卸载该软件 (慎用，按需决定是否保留)
+        brew bundle install --global --no-upgrade --cleanup
+        
+        # 强迫症清理：rm -f 即使文件不存在也不会报错
+        rm -f "$HOME/Brewfile.lock.json"
+        
+        # 显式返回成功状态码码
+        exit 0
+    else
+        echo "⚠️ 未发现 Homebrew，跳过同步。"
+        exit 0
+    fi
+else
+    echo "ℹ️ 非 macOS 环境，跳过软件安装。"
+    exit 0
+fi

@@ -84,3 +84,6 @@ if [[ -n "$MAMBA_EXE" ]]; then
         [ -n "$env" ] && mamba activate "$env"
     }
 fi
+
+# 这里的 .. 是为了从 dot_tmpl 向上跳回仓库根目录，进入 homebrew 文件夹
+alias bup="brew bundle dump --force --file=\"\$(chezmoi source-path)/../homebrew/Brewfile\" && chezmoi apply"
