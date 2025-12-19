@@ -28,6 +28,12 @@ set backupdir=~/.vim/files/backup
 set directory=~/.vim/files/swap
 
 " --- 4. 核心设置 ---
+" 强制内部使用 UTF-8，防止中文乱码
+set encoding=utf-8
+" 自动识别文件编码列表（按优先级从高到低
+set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936,latin1
+" 终端输出编码
+set termencoding=utf-8
 set showcmd
 set showmatch
 set ignorecase
