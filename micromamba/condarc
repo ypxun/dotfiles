@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+  - nodefaults
+show_channel_urls: true
+max_parallel_streams: 10
+

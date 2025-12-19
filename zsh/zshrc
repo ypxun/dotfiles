@@ -50,7 +50,7 @@ zstyle ':omz:update' mode auto
 
 plugins=(
   git sudo colorize extract colored-man-pages fzf
-  z history-substring-search eza
+  history-substring-search eza
   zsh-autosuggestions
   zsh-autocomplete
   docker docker-compose node npm
@@ -59,8 +59,28 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-# --- 5. 别名 & 修正 ---
+# --- 3. 插件自定义配置 (放在这里) ---
+# zsh-autocomplete 驯服脚本
+# 只有当你按 Tab 或上下键时才选中，不会在你打字时“强行”截获你的回车
+zstyle ':autocomplete:*' insert-unambiguous yes
+zstyle ':autocomplete:*' widget-style menu-select
+
 alias ls="eza --icons=always"
-alias cd="z"
+alias cat="bat -P" # -P 禁用自动翻页，表现得像正常的 cat
 alias cz="chezmoi"
 alias cze="chezmoi edit"
+
+# 初始化 zoxide
+if command -v zoxide &> /dev/null; then
+    eval "$(zoxide init zsh)"
+    alias cd="z"  # 保持习惯，但别忘了还有交互模式 'zi'
+fi
+
+# Mamba 环境管理
+if [[ -n "$MAMBA_EXE" ]]; then
+    mact() {
+        local env
+        env=$("$MAMBA_EXE" env list | grep -v '^#' | grep -v '^$' | fzf --height 40% --reverse --header "切换 Mamba 环境:" | awk '{print $1}')
+        [ -n "$env" ] && mamba activate "$env"
+    }
+fi
