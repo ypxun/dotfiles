@@ -219,12 +219,12 @@ PATH = '/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:${PA
 
     # 终端
     alt-t = [
-        'exec-and-forget open -na Wezterm'
+        'exec-and-forget wezterm start'
     ]
 
     # 浏览器
     alt-b = [
-        'exec-and-forget open -na Firefox'
+        'exec-and-forget open -a Firefox --args -new-window'
     ]
 
 # 'service' binding mode declaration.
