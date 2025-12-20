@@ -21,10 +21,12 @@ case "$OS_ID" in
         sudo apt update
         sudo apt install -y "${COMMON_PKGS[@]}" "$BAT_PKG" "$FD_PKG" || echo "⚠️ 部分包安装失败。"
         echo "🔗 修复指令名差异 (bat/fd)..."
-        [ -f /usr/bin/batcat ] && [ ! -x "$(command -v bat)" ] && sudo ln -s /usr/bin/batcat /usr/local/bin/bat
-        [ -f /usr/bin/fdfind ] && [ ! -x "$(command -v fd)" ] && sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
+        # 无论如何，把 fdfind 链接成 fd 和 fd-find (兼容你所有的配置)
+        [ -f /usr/bin/fdfind ] && sudo ln -sf /usr/bin/fdfind /usr/local/bin/fd
+        [ -f /usr/bin/fdfind ] && sudo ln -sf /usr/bin/fdfind /usr/local/bin/fd-find
+        # 把 batcat 链接成 bat
+        [ -f /usr/bin/batcat ] && sudo ln -sf /usr/bin/batcat /usr/local/bin/bat
         ;;
-    "arch")
         echo "󰣇 Arch: 同步核心包..."
         sudo pacman -Syu --needed --noconfirm "${COMMON_PKGS[@]}" "$BAT_PKG" "$FD_PKG" || echo "⚠️ 安装异常。"
         ;;
