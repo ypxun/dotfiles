@@ -27,6 +27,7 @@ case "$OS_ID" in
         # 把 batcat 链接成 bat
         [ -f /usr/bin/batcat ] && sudo ln -sf /usr/bin/batcat /usr/local/bin/bat
         ;;
+    "arch")
         echo "󰣇 Arch: 同步核心包..."
         sudo pacman -Syu --needed --noconfirm "${COMMON_PKGS[@]}" "$BAT_PKG" "$FD_PKG" || echo "⚠️ 安装异常。"
         ;;
