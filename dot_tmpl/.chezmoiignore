@@ -1,15 +1,19 @@
+# --- 1. Windows 排除项 ---
 {{- if eq .chezmoi.os "windows" }}
 .zshrc
 .p10k.zsh
 .vimrc
 {{- end }}
 
+# --- 2. 非 macOS 排除项 (AeroSpace & Hammerspoon) ---
 {{- if ne .chezmoi.os "darwin" }}
 .aerospace.toml
-.hammerspoon
+.hammerspoon/        # 注意加上斜杠，代表目录
 .hammerspoon/**
 {{- end }}
 
+# --- 3. 只有 macOS 和 Windows 才能拥有的 WezTerm ---
+# 既然你在 Linux (Debian/Arch) 上不用 WezTerm (可能用系统原生终端)
 {{- if and (ne .chezmoi.os "darwin") (ne .chezmoi.os "windows") }}
 .wezterm.lua
 {{- end }}

@@ -1,25 +1,40 @@
 #!/bin/bash
 
-# Brewfile 哈希变动检测: {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
-echo "📦 检测到 Brewfile 变动，开始同步软件列表..."
+# Brewfile 哈希 (仅 Mac 敏感): {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
 
-if [[ "$(uname)" == "Darwin" ]]; then
-    if command -v brew &> /dev/null; then
-        # 执行安装
-        # --no-upgrade: 仅安装缺失项，不更新已存在的包，速度极快
-        # --cleanup: 如果你从 Brewfile 删除了某项，apply 后它会自动卸载该软件 (慎用，按需决定是否保留)
-        brew bundle install --global --no-upgrade --cleanup
-        
-        # 强迫症清理：rm -f 即使文件不存在也不会报错
-        rm -f "$HOME/Brewfile.lock.json"
-        
-        # 显式返回成功状态码码
-        exit 0
-    else
-        echo "⚠️ 未发现 Homebrew，跳过同步。"
-        exit 0
-    fi
-else
-    echo "ℹ️ 非 macOS 环境，跳过软件安装。"
-    exit 0
-fi
+OS_ID="{{ .osid }}"
+COMMON_PKGS=({{- range .common_packages }}{{ . | quote }} {{ end -}})
+BAT_PKG="{{ .bat_pkg }}"
+FD_PKG="{{ .fd_pkg }}"
+
+echo "🛠️  正在同步 [$OS_ID] 的软件环境..."
+
+case "$OS_ID" in
+    "darwin")
+        if command -v brew &> /dev/null; then
+            echo "🍎 macOS: 正在同步 Brewfile..."
+            brew bundle install --no-upgrade --cleanup --file="{{ joinPath .chezmoi.workingTree "homebrew/Brewfile" }}"
+        fi
+        ;;
+    "debian")
+        echo "🌀 Debian: 安装核心工具..."
+        sudo apt update
+        sudo apt install -y "${COMMON_PKGS[@]}" "$BAT_PKG" "$FD_PKG" || echo "⚠️ 部分包安装失败。"
+        echo "🔗 修复指令名差异 (bat/fd)..."
+        [ -f /usr/bin/batcat ] && [ ! -x "$(command -v bat)" ] && sudo ln -s /usr/bin/batcat /usr/local/bin/bat
+        [ -f /usr/bin/fdfind ] && [ ! -x "$(command -v fd)" ] && sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
+        ;;
+    "arch")
+        echo "󰣇 Arch: 同步核心包..."
+        sudo pacman -Syu --needed --noconfirm "${COMMON_PKGS[@]}" "$BAT_PKG" "$FD_PKG" || echo "⚠️ 安装异常。"
+        ;;
+esac
+
+echo -e "\n🔍 增强组件检测 (如有缺失请手动安装):"
+{{- range .enhanced_packages }}
+{{ if (hasPrefix "zsh-" .) -}}
+    [ -d "$HOME/.oh-my-zsh/custom/plugins/{{ . }}" ] && echo "✅ [插件] {{ . }}" || echo "💡 [缺失] 插件: {{ . }}"
+{{- else -}}
+    command -v {{ . }} &> /dev/null && echo "✅ [工具] {{ . }}" || echo "💡 [缺失] 工具: {{ . }}"
+{{- end }}
+{{- end }}

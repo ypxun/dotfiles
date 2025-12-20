@@ -1,47 +1,29 @@
-# --- 1. 自动检测系统环境 (纯 Zsh 逻辑) ---
-# 放在最前面，确保 PATH 准备就绪
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    if [[ "$(uname -m)" == "arm64" ]]; then
-        # Apple Silicon Mac
-        [[ -f /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-    else
-        # Intel Mac
-        [[ -f /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
-    fi
-fi
-
+# --- 1. 跨平台特殊处理 ---
 # WSL 特有处理
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
     alias open=explorer.exe
 fi
 
-# --- 2. Powerlevel10k Instant Prompt ---
-# 必须紧随环境检测之后
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# --- 2. 环境配置与 P10K ---
+# 这里的 Instant Prompt 已由模板处理，此处只 source 配置文件
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# --- 3. 环境变量 (通用) ---
-[ -d "/usr/local/opt/mtr/sbin" ] && export PATH="/usr/local/opt/mtr/sbin:$PATH"
-[ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env"
+# 通用变量
 export LANG=zh_CN.UTF-8
 [ -f ~/.zshrc.secret ] && source ~/.zshrc.secret
 
-# >>> mamba initialize >>>
-# 自动定位：无论是 Intel Mac 还是 ARM Mac，只要存在就赋值
-[ -f "/usr/local/opt/micromamba/bin/mamba" ] && export MAMBA_EXE='/usr/local/opt/micromamba/bin/mamba'
-[ -f "/opt/homebrew/opt/micromamba/bin/mamba" ] && export MAMBA_EXE='/opt/homebrew/opt/micromamba/bin/mamba'
-# 兼容 Linux (Debian/Arch/WSL2) 的标准手动安装路径
-[ -z "$MAMBA_EXE" ] && [ -f "/usr/local/bin/mamba" ] && export MAMBA_EXE='/usr/local/bin/mamba'
-
-if [ -f "$MAMBA_EXE" ]; then
+# --- 3. Mamba (Micromamba) 初始化 ---
+# 利用模板注入的 $MAMBA_EXE，实现“装了就用，没装不报报错”
+if [[ -f "$MAMBA_EXE" ]]; then
     export MAMBA_ROOT_PREFIX="$HOME/mamba"
     __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-    if [ $? -eq 0 ]; then eval "$__mamba_setup"; else alias mamba="$MAMBA_EXE"; fi
+    if [ $? -eq 0 ]; then 
+        eval "$__mamba_setup"
+    else 
+        alias mamba="$MAMBA_EXE"
+    fi
     unset __mamba_setup
 fi
-# <<< mamba initialize <<<
 
 # --- 4. Oh My Zsh 框架配置 ---
 export ZSH="$HOME/.oh-my-zsh"
@@ -49,35 +31,35 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 zstyle ':omz:update' mode auto
 
 plugins=(
-  git sudo colorize extract colored-man-pages fzf
-  history-substring-search eza
-  zsh-autosuggestions
-  zsh-autocomplete
-  docker docker-compose node npm
-  zsh-syntax-highlighting
+    git sudo colorize extract colored-man-pages fzf
+    history-substring-search eza
+    zsh-autosuggestions
+    zsh-autocomplete
+    docker docker-compose node npm
+    zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh
 
-# --- 3. 插件自定义配置 (放在这里) ---
-# zsh-autocomplete 驯服脚本
-# 只有当你按 Tab 或上下键时才选中，不会在你打字时“强行”截获你的回车
+# --- 5. 插件自定义配置 (必须在 source $ZSH 之后) ---
+# zsh-autocomplete 驯服脚本：只有按 Tab 或上下键时才选中
 zstyle ':autocomplete:*' insert-unambiguous yes
 zstyle ':autocomplete:*' widget-style menu-select
 
+# 通用别名
 alias ls="eza --icons=always"
-alias cat="bat -P" # -P 禁用自动翻页，表现得像正常的 cat
+alias cat="bat -P" 
 alias cz="chezmoi"
 alias cze="chezmoi edit"
 
 # 初始化 zoxide
 if command -v zoxide &> /dev/null; then
     eval "$(zoxide init zsh)"
-    alias cd="z"  # 保持习惯，但别忘了还有交互模式 'zi'
+    alias cd="z"
 fi
 
-# Mamba 环境管理
-if [[ -n "$MAMBA_EXE" ]]; then
+# Mamba 环境管理快捷函数 (mact)
+if [[ -f "$MAMBA_EXE" ]]; then
     mact() {
         local env
         env=$("$MAMBA_EXE" env list | grep -v '^#' | grep -v '^$' | fzf --height 40% --reverse --header "切换 Mamba 环境:" | awk '{print $1}')
@@ -85,5 +67,7 @@ if [[ -n "$MAMBA_EXE" ]]; then
     }
 fi
 
-# 这里的 .. 是为了从 dot_tmpl 向上跳回仓库根目录，进入 homebrew 文件夹
-alias bup="brew bundle dump --force --file=\"\$(chezmoi source-path)/../homebrew/Brewfile\" && chezmoi apply"
+# Mac 专用：Homebrew 备份与同步别名
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    alias bup="brew bundle dump --force --file=\"\$(chezmoi source-path)/../homebrew/Brewfile\" && chezmoi apply"
+fi

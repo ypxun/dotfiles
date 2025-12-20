@@ -1,1 +1,23 @@
-{{- include (joinPath .chezmoi.workingTree "zsh/zshrc") -}}
+# --- 1. 第一优先级：P10K Instant Prompt ---
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# --- 2. 第二优先级：Chezmoi 注入环境变量 ---
+export MAMBA_EXE={{ .mamba_exe | quote }}
+
+{{ if eq .chezmoi.os "darwin" -}}
+{{- $brew_exe := "/usr/local/bin/brew" }}{{ if eq .chezmoi.arch "arm64" }}{{ $brew_exe = "/opt/homebrew/bin/brew" }}{{ end -}}
+[[ -f {{ $brew_exe | quote }} ]] && eval "$({{ $brew_exe }} shellenv)"
+{{- end }}
+
+# --- 3. 第三优先级：引入原始 zshrc 主体 ---
+{{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
+
+# --- 4. 最终补丁：抹平别名 (更加通用的写法) ---
+{{ if ne .bat_pkg "bat" -}}
+alias bat={{ .bat_pkg | quote }}
+{{- end }}
+{{ if ne .fd_pkg "fd" -}}
+alias fd={{ .fd_pkg | quote }}
+{{- end }}

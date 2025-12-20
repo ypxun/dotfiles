@@ -1,9 +1,55 @@
 {{- $email := promptStringOnce . "email" "Email address" -}}
 {{- $name := promptStringOnce . "name" "User name" -}}
 
+{{- /* 1. 安全获取 osID：Mac 下没有 osRelease.id，直接 fallback 到 .chezmoi.os */ -}}
+{{- $osID := .chezmoi.os -}}
+{{- if (hasKey .chezmoi "osRelease") -}}
+    {{- if (hasKey .chezmoi.osRelease "id") -}}
+        {{- $osID = .chezmoi.osRelease.id -}}
+    {{- end -}}
+{{- end -}}
+
+{{- /* 2. 构造平台索引 Key (区分 Intel/ARM Mac) */ -}}
+{{- $platformKey := $osID -}}
+{{- if eq .chezmoi.os "darwin" -}}
+    {{- $platformKey = printf "darwin-%s" .chezmoi.arch -}}
+{{- end -}}
+
 [data]
     email = {{ $email | quote }}
     name = {{ $name | quote }}
+    osid = {{ $osID | quote }}
+
+    # 1. 共同包清单 (官方源核心工具)
+    common_packages = [
+        "chezmoi", "zoxide", "fzf", "ripgrep", "jq", 
+        "tree", "uv", "git", "git-delta", "nodejs", "npm"
+    ]
+
+    # 2. 增强包清单 (逻辑名，仅用于检测与手动指引)
+    enhanced_packages = [
+        "eza", "micromamba", "borders",
+        "zsh-autosuggestions", "zsh-syntax-highlighting", "zsh-autocomplete"
+    ]
+
+# 3. 差异化包名映射
+    {{- $bat_map := dict "darwin" "bat" "debian" "batcat" "arch" "bat" }}
+    bat_pkg = {{ index $bat_map $osID | default "bat" | quote }}
+    {{- $fd_map := dict "darwin" "fd" "debian" "fd-find" "arch" "fd" }}
+    fd_pkg = {{ index $fd_map $osID | default "fd" | quote }}
+
+    # 4. Mamba 路径字典 (修正 Intel/ARM Mac 官方 Homebrew 路径)
+    {{- $mamba_paths := dict 
+        "darwin-arm64" "/opt/homebrew/opt/micromamba/bin/mamba" 
+        "darwin-amd64" "/usr/local/opt/micromamba/bin/mamba" 
+        "debian"       "/usr/local/bin/micromamba" 
+        "arch"         "/usr/bin/micromamba" 
+    }}
+    {{- /* 逻辑计算：优先使用 $platformKey 匹配，保底使用 /usr/local/bin/micromamba */ -}}
+    {{- $mamba_val := index $mamba_paths $platformKey | default "/usr/local/bin/micromamba" }}
+    mamba_exe = {{ $mamba_val | quote }}
+
+# --- 以下为你原有的全局配置 ---
 
 ignorePatterns = [
   "*.secret", "*.key", "*.pem", "*.token",
@@ -26,5 +72,6 @@ ignorePatterns = [
 
 [cd]
     command = {{ if eq .chezmoi.os "windows" }}"pwsh"{{ else }}"zsh"{{ end }}
+
 [apply]
     refreshPeriod = "1m"
