@@ -48,7 +48,6 @@ zstyle ':autocomplete:*' widget-style menu-select
 
 # 通用别名
 alias ls="eza --icons=always"
-alias cat="bat -P" 
 alias cz="chezmoi"
 alias cze="chezmoi edit"
 

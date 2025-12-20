@@ -14,10 +14,16 @@ export MAMBA_EXE={{ .mamba_exe | quote }}
 # --- 3. 第三优先级：引入原始 zshrc 主体 ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 
-# --- 4. 最终补丁：抹平别名 (更加通用的写法) ---
+# --- 4. 最终补丁：抹平跨平台命令名差异 ---
+# 这里利用模板生成的 .bat_pkg (bat/batcat) 和 .fd_pkg (fd/fdfind)
 {{ if ne .bat_pkg "bat" -}}
 alias bat={{ .bat_pkg | quote }}
 {{- end }}
 {{ if ne .fd_pkg "fd" -}}
 alias fd={{ .fd_pkg | quote }}
 {{- end }}
+
+# 统一别名：依赖上面已经校准过的 bat 命令
+if command -v {{ .bat_pkg }} &> /dev/null; then
+    alias cat="bat -P"
+fi
