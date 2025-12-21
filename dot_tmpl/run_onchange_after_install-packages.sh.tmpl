@@ -1,23 +1,25 @@
 #!/bin/bash
 
-{{/* 1. 解决 Windows/Mac/Linux 兼容性：如果 osid 不存在，则设为空字符串 */}}
+{{/* 1. 解决兼容性：先安全地获取 osid */}}
 {{- $osid := .chezmoi.os -}}
 {{- if (hasKey .chezmoi "osid") -}}
     {{- $osid = .chezmoi.osid -}}
 {{- end -}}
 
-# Brewfile 哈希 (仅 Mac 敏感): {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
-
-OS_ID="{{ $osid }}"
-COMMON_PKGS=({{- range .common_packages }}{{ . | quote }} {{ end -}})
-BAT_PKG="{{ .bat_pkg }}"
-FD_PKG="{{ .fd_pkg }}"
-
-{{/* 2. 如果是 Windows，直接退出脚本，因为 Windows 不跑 bash 脚本 */}}
+{{/* 2. 只有在非 Windows 下才继续执行逻辑 */}}
 {{- if eq .chezmoi.os "windows" }}
-# Windows detected, skipping bash script execution.
+# Windows detected, exit script.
 exit 0
 {{- end }}
+
+# Brewfile 哈希: {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
+
+OS_ID="{{ $osid }}"
+
+{{/* 注意：这里改成了 $. 来引用全局变量 */}}
+COMMON_PKGS=({{- range $.common_packages }}{{ . | quote }} {{ end -}})
+BAT_PKG="{{ $.bat_pkg }}"
+FD_PKG="{{ $.fd_pkg }}"
 
 echo "🛠️  正在同步 [$OS_ID] 的软件环境..."
 
