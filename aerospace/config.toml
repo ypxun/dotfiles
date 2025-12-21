@@ -292,6 +292,10 @@ PATH = '/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:${PA
     if.app-id = 'org.mozilla.thunderbird'
     run = ['move-node-to-workspace M']
 
+[[on-window-detected]]
+    if.app-id = 'ru.keepcoder.Telegram'
+    run = ['layout floating']
+
 
 # [[on-window-detected]]
 #     check-further-callbacks = true
