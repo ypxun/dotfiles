@@ -3,6 +3,7 @@
 .zshrc
 .p10k.zsh
 .vimrc
+run_onchange_after_install-packages.sh
 {{- end }}
 
 # --- 2. 非 macOS 排除项 (AeroSpace & Hammerspoon) ---
