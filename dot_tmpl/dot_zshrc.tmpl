@@ -5,6 +5,9 @@ fi
 
 # --- 2. 第二优先级：Chezmoi 注入环境变量 ---
 export MAMBA_EXE={{ .mamba_exe | quote }}
+# 让 FZF 默认使用 fd (提速 + 忽略 .git/node_modules)
+# 放在这里，确保后续加载插件时该变量已存在
+export FZF_DEFAULT_COMMAND='fd --type f'
 
 {{ if eq .chezmoi.os "darwin" -}}
 {{- $brew_exe := "/usr/local/bin/brew" }}{{ if eq .chezmoi.arch "arm64" }}{{ $brew_exe = "/opt/homebrew/bin/brew" }}{{ end -}}
@@ -15,15 +18,12 @@ export MAMBA_EXE={{ .mamba_exe | quote }}
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 
 # --- 4. 最终补丁：抹平跨平台命令名差异 ---
-# 这里利用模板生成的 .bat_pkg (bat/batcat) 和 .fd_pkg (fd/fdfind)
-{{ if ne .bat_pkg "bat" -}}
-alias bat={{ .bat_pkg | quote }}
-{{- end }}
-{{ if ne .fd_pkg "fd" -}}
-alias fd={{ .fd_pkg | quote }}
+
+# 1. 差异化适配
+{{ if (or (eq .osid "debian") (eq .osid "ubuntu")) -}}
+alias fd='fdfind'
+alias bat='batcat'
 {{- end }}
 
-# 统一别名：依赖上面已经校准过的 bat 命令
-if command -v {{ .bat_pkg }} &> /dev/null; then
-    alias cat="bat -P"
-fi
+# 2. 现代工具别名 
+alias cat='bat -P'

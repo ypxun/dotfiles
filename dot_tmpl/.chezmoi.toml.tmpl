@@ -23,7 +23,8 @@
     # 1. 共同包清单 (官方源核心工具)
     common_packages = [
         "chezmoi", "zoxide", "fzf", "ripgrep", "jq", 
-        "tree", "uv", "git", "git-delta", "nodejs", "npm"
+        "tree", "uv", "git", "git-delta", "nodejs", "npm", 
+        "fd", "bat"
     ]
 
     # 2. 增强包清单 (逻辑名，仅用于检测与手动指引)
@@ -32,13 +33,7 @@
         "zsh-autosuggestions", "zsh-syntax-highlighting", "zsh-autocomplete"
     ]
 
-# 3. 差异化包名映射
-    {{- $bat_map := dict "darwin" "bat" "debian" "batcat" "arch" "bat" }}
-    bat_pkg = {{ index $bat_map $osID | default "bat" | quote }}
-    {{- $fd_map := dict "darwin" "fd" "debian" "fd-find" "arch" "fd" }}
-    fd_pkg = {{ index $fd_map $osID | default "fd" | quote }}
-
-    # 4. Mamba 路径字典 (修正 Intel/ARM Mac 官方 Homebrew 路径)
+    # 3. Mamba 路径字典 (修正 Intel/ARM Mac 官方 Homebrew 路径)
     {{- $mamba_paths := dict 
         "darwin-arm64" "/opt/homebrew/opt/micromamba/bin/mamba" 
         "darwin-amd64" "/usr/local/opt/micromamba/bin/mamba" 
@@ -49,6 +44,24 @@
     {{- $mamba_val := index $mamba_paths $platformKey | default "/usr/local/bin/micromamba" }}
     mamba_exe = {{ $mamba_val | quote }}
 
+    # 1. 平台包管理器命令映射
+    {{- $update_map := dict 
+        "darwin" "brew update" 
+        "debian" "sudo apt update" 
+        "ubuntu" "sudo apt update" 
+        "arch"   "sudo pacman -Sy" 
+        "fedora" "sudo dnf check-update" 
+    -}}
+    {{- $install_map := dict 
+        "darwin" "brew install" 
+        "debian" "sudo apt install -y" 
+        "ubuntu" "sudo apt install -y" 
+        "arch"   "sudo pacman -S --needed --noconfirm" 
+        "fedora" "sudo dnf install -y" 
+    -}}
+
+    update_cmd = {{ index $update_map .osid | quote }}
+    install_cmd = {{ index $install_map .osid | quote }}
 # --- 以下为你原有的全局配置 ---
 
 ignorePatterns = [

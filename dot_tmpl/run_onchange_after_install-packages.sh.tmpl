@@ -1,35 +1,50 @@
 #!/bin/bash
 
-# Brewfile 哈希 (仅 Mac 敏感): {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
+# 监控 Brewfile: {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
 
 OS_ID="{{ .osid }}"
+UPDATE_CMD="{{ .update_cmd }}"
+INSTALL_CMD="{{ .install_cmd }}"
 COMMON_PKGS=({{- range .common_packages }}{{ . | quote }} {{ end -}})
-BAT_PKG="{{ .bat_pkg }}"
-FD_PKG="{{ .fd_pkg }}"
+FAILED_PKGS=()
 
-case "$OS_ID" in
-    "darwin")
-        if command -v brew &> /dev/null; then
-            echo "🍎 macOS: 正在同步 Brewfile..."
-            brew bundle install --no-upgrade --cleanup --file="{{ joinPath .chezmoi.workingTree "homebrew/Brewfile" }}"
+echo "🚀 平台 [$OS_ID]: 开始维护核心工具..."
+
+# 1. 执行更新命令
+echo "🔄 正在更新软件包索引..."
+eval "$UPDATE_CMD"
+
+# 2. 安装逻辑
+if [[ "$OS_ID" == "darwin" ]]; then
+    if command -v brew &> /dev/null; then
+        echo "🍎 macOS: 正在同步 Brewfile..."
+        brew bundle install --no-upgrade --cleanup --file="{{ joinPath .chezmoi.workingTree "homebrew/Brewfile" }}"
+    fi
+else
+    echo "📦 正在尝试安装通用包清单..."
+    for pkg in "${COMMON_PKGS[@]}"; do
+        echo "   -> 正在安装: $pkg"
+        if ! $INSTALL_CMD "$pkg"; then
+            FAILED_PKGS+=("$pkg")
         fi
-        ;;
-    "debian")
-        echo "🌀 Debian: 安装核心工具..."
-        sudo apt update
-        sudo apt install -y "${COMMON_PKGS[@]}" "$BAT_PKG" "$FD_PKG" || echo "⚠️ 部分包安装失败。"
-        echo "🔗 修复指令名差异 (bat/fd)..."
-        # 无论如何，把 fdfind 链接成 fd 和 fd-find (兼容你所有的配置)
-        [ -f /usr/bin/fdfind ] && sudo ln -sf /usr/bin/fdfind /usr/local/bin/fd
-        [ -f /usr/bin/fdfind ] && sudo ln -sf /usr/bin/fdfind /usr/local/bin/fd-find
-        # 把 batcat 链接成 bat
-        [ -f /usr/bin/batcat ] && sudo ln -sf /usr/bin/batcat /usr/local/bin/bat
-        ;;
-    "arch")
-        echo "󰣇 Arch: 同步核心包..."
-        sudo pacman -Syu --needed --noconfirm "${COMMON_PKGS[@]}" "$BAT_PKG" "$FD_PKG" || echo "⚠️ 安装异常。"
-        ;;
-esac
+    done
+fi
+
+# 3. 汇总与提示 (提示两次：列表 + 总结行)
+if [ ${#FAILED_PKGS[@]} -ne 0 ]; then
+    echo -e "\n\033[1;31m❌ [提示 1/2] 以下软件包安装失败:\033[0m"
+    for p in "${FAILED_PKGS[@]}"; do
+        echo -e "  - $p"
+    done
+
+    echo -e "\n\033[1;33m⚠️  [提示 2/2] 请注意:\033[0m"
+    FAILED_STR=$(IFS=,; echo "${FAILED_PKGS[*]}")
+    echo "   系统检测到包 [$FAILED_STR] 未能成功安装。"
+    echo "   这通常是因为包名在当前 OS ($OS_ID) 下不一致或源中不存在。"
+else
+    echo -e "\n\033[1;32m✅ 核心基础包已全部就绪!\033[0m"
+fi
+
 
 echo -e "\n🔍 增强组件检测 (如有缺失请手动安装):"
 {{- range .enhanced_packages }}
