@@ -60,8 +60,8 @@
         "fedora" "sudo dnf install -y" 
     -}}
 
-    update_cmd = {{ index $update_map .osid | quote }}
-    install_cmd = {{ index $install_map .osid | quote }}
+    update_cmd = {{ index $update_map .osid | default "echo 'No update cmd'" | quote }}
+    install_cmd = {{ index $install_map .osid | default "echo 'No install cmd'" | quote }}
 # --- 以下为你原有的全局配置 ---
 
 ignorePatterns = [
