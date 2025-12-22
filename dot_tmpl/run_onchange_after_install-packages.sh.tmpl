@@ -3,18 +3,13 @@
 # 监控 Brewfile: {{ include (joinPath .chezmoi.workingTree "homebrew/Brewfile") | sha256sum }}
 
 OS_ID="{{ .osid }}"
-UPDATE_CMD="{{ .update_cmd }}"
 INSTALL_CMD="{{ .install_cmd }}"
 COMMON_PKGS=({{- range .common_packages }}{{ . | quote }} {{ end -}})
 FAILED_PKGS=()
 
 echo "🚀 平台 [$OS_ID]: 开始维护核心工具..."
 
-# 1. 执行更新命令
-echo "🔄 正在更新软件包索引..."
-eval "$UPDATE_CMD"
-
-# 2. 安装逻辑
+# 1. 安装逻辑
 if [[ "$OS_ID" == "darwin" ]]; then
     if command -v brew &> /dev/null; then
         echo "🍎 macOS: 正在同步 Brewfile..."
@@ -30,7 +25,7 @@ else
     done
 fi
 
-# 3. 汇总与提示 (提示两次：列表 + 总结行)
+# 2. 汇总与提示 (提示两次：列表 + 总结行)
 if [ ${#FAILED_PKGS[@]} -ne 0 ]; then
     echo -e "\n\033[1;31m❌ [提示 1/2] 以下软件包安装失败:\033[0m"
     for p in "${FAILED_PKGS[@]}"; do

@@ -19,7 +19,15 @@
     email = {{ $email | quote }}
     name = {{ $name | quote }}
     osid = {{ $osID | quote }}
-
+    
+    {{- $install_map := dict 
+        "debian" "sudo apt install -y" 
+        "ubuntu" "sudo apt install -y" 
+        "arch"   "sudo pacman -S --needed --noconfirm" 
+        "fedora" "sudo dnf install -y" 
+    -}}
+    # 如果是 Mac，这个值在脚本里不会被用到，给个空或者默认即可
+    install_cmd = {{ index $install_map $osID | default "" | quote }}
     # 1. 共同包清单 (官方源核心工具)
     common_packages = [
         "chezmoi", "zoxide", "fzf", "ripgrep", "jq", 
@@ -44,24 +52,6 @@
     {{- $mamba_val := index $mamba_paths $platformKey | default "/usr/local/bin/micromamba" }}
     mamba_exe = {{ $mamba_val | quote }}
 
-    # 1. 平台包管理器命令映射
-    {{- $update_map := dict 
-        "darwin" "brew update" 
-        "debian" "sudo apt update" 
-        "ubuntu" "sudo apt update" 
-        "arch"   "sudo pacman -Sy" 
-        "fedora" "sudo dnf check-update" 
-    -}}
-    {{- $install_map := dict 
-        "darwin" "brew install" 
-        "debian" "sudo apt install -y" 
-        "ubuntu" "sudo apt install -y" 
-        "arch"   "sudo pacman -S --needed --noconfirm" 
-        "fedora" "sudo dnf install -y" 
-    -}}
-
-    update_cmd = {{ index $update_map .osid | default "echo 'No update cmd'" | quote }}
-    install_cmd = {{ index $install_map .osid | default "echo 'No install cmd'" | quote }}
 # --- 以下为你原有的全局配置 ---
 
 ignorePatterns = [
