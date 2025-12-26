@@ -1,4 +1,4 @@
-{{- /* 1. Windows 特有排除 */ -}}
+# 1. Windows 特有排除  
 {{- if eq .chezmoi.os "windows" }}
 .zshrc
 .p10k.zsh
@@ -7,14 +7,14 @@
 .chezmoiscripts/**
 {{- end }}
 
-{{- /* 2. 跨平台/特定模式排除 */ -}}
+# 2. 跨平台/特定模式排除  
 # 如果不是“私人、无头、非临时”环境，则排除 authorized_keys
 # 这样 Mac、公司电脑、容器环境都不会产生这个文件
 {{- if not (and .personal .headless (not .ephemeral)) }}
 .ssh/authorized_keys
 {{- end }}
 
-{{- /* 2. macOS 独占软件排除 (AeroSpace, Hammerspoon) */ -}}
+# 2. macOS 独占软件排除 (AeroSpace, Hammerspoon)  
 {{- if ne .chezmoi.os "darwin" }}
 .aerospace.toml
 .hammerspoon/
@@ -26,7 +26,7 @@
 .wezterm.lua
 {{- end }}
 
-{{- /* 4. 隐私隔离墙：核心！ */ -}}
+# 4. 隐私隔离墙：核心！  
 # 如果不是个人设备，或者在临时环境（如 codespaces）中，不要同步私钥
 {{- if or (not .personal) .ephemeral }}
 .ssh/
@@ -42,7 +42,7 @@
 .ssh/key_vps_user
 {{- end }}
 
-{{- /* 5. 脚本排除 */ -}}
+# 5. 脚本排除  
 # 只有在 Linux 下才跑 linux 文件夹里的脚本
 {{- if ne .chezmoi.os "linux" }}
 .chezmoiscripts/linux/**
