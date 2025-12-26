@@ -6,8 +6,8 @@
 
 {{- /* 2. 操作系统与主机名探测 */ -}}
 {{- $osID := .chezmoi.os -}}
-{{- if and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id") -}}
-    {{- $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- if hasKey .chezmoi.osRelease "id" -}}
+    {{- $osID = .chezmoi.osRelease.id -}} {{/* 直接用 debian, ubuntu, arch 等，不加 linux- 前缀 */}}
 {{- end -}}
 
 {{- $hostname := .chezmoi.hostname -}}
