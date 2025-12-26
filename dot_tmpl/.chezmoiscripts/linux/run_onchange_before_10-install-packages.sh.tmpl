@@ -2,7 +2,13 @@
 # 监控清单变化: {{ include (joinPath .chezmoi.workingTree "packages/pkgs.txt") | sha256sum }}
 set -eufo pipefail
 
-{{ $sudo := "sudo " -}}{{ if eq .chezmoi.username "root" }}{{ $sudo = "" }}{{ end -}}
+{{ $sudo_val := "sudo " -}}
+{{- if eq .chezmoi.username "root" -}}
+    {{- $sudo_val = "" -}}
+{{- end -}}
+
+# 将 Go 变量的值赋给 Shell 变量 sudo
+sudo={{ $sudo_val | quote }}
 OS_ID={{ .osid | quote }}
 
 # 1. 提取并翻译包清单
