@@ -1,13 +1,13 @@
-# 计算换行符逻辑 
+{{/* 1. 计算换行符逻辑 */}}
 {{- $crlf := "autocrlf = input" -}}
 {{- if eq .chezmoi.os "windows" -}}
     {{- $crlf = "autocrlf = true" -}}
 {{- end -}}
 
-# 读取真身内容 
+{{/* 2. 读取真身内容 */}}
 {{- $raw_config := include (joinPath .chezmoi.workingTree "git/gitconfig") -}}
 
-# 执行链式替换并输出 
+{{/* 3. 执行链式替换并输出 */}}
 {{- $raw_config 
     | replace "@GIT_NAME@" .name 
     | replace "@GIT_EMAIL@" .email 
