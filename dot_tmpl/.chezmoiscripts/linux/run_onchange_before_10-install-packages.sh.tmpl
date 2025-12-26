@@ -24,7 +24,7 @@ OS_ID={{ .osid | quote }}
         
         {{- /* 针对 Arch 的名翻译 (Arch 源里 micromamba 通常叫 micromamba-bin 等，这里暂定原名或空) */ -}}
         {{- if eq $.osid "arch" -}}
-            {{- if eq $p "micromamba" }}{{ $target = "" }}{{ /* Arch 建议也走脚本 20 的二进制安装，更稳定 */ }}{{ end -}}
+            {{- if eq $p "micromamba" }}{{ end -}}
         {{- end -}}
 
         {{- if $target }}{{ $install_list = append $install_list $target }}{{ end -}}
