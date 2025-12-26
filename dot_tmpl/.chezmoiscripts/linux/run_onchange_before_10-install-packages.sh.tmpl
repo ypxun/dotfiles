@@ -18,7 +18,7 @@ OS_ID={{ .osid | quote }}
         {{- if eq $.osid "debian" "ubuntu" -}}
             {{- if eq $p "fd" }}{{ $target = "fd-find" }}{{ end -}}
             {{- if or (eq $p "eza") (eq $p "micromamba") -}}
-                {{- $target = "" /* 这两个包在 Debian 官方源无法直接装... */ -}}
+                {{- $target = "" }} {{ /* 这两个包在 Debian 官方源无法直接装，标记为空，由脚本 20 处理 */ -}}
             {{- end -}}
         {{- end -}}
         
