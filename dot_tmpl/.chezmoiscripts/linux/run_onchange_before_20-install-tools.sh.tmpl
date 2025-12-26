@@ -13,20 +13,6 @@ if ! command -v eza &> /dev/null; then
 fi
 {{- end }}
 
-# [Bitwarden CLI: 仅限 Personal 设备安装]
-{{ if .personal -}}
-if ! command -v bw &> /dev/null; then
-    echo "📥 正在为 Personal 设备安装 Bitwarden CLI..."
-    BW_URL="https://vault.bitwarden.com/download/?app=cli&platform=linux"
-    TEMP_DIR=$(mktemp -d)
-    curl -Ls "$BW_URL" -o "$TEMP_DIR/bw.zip"
-    unzip -q "$TEMP_DIR/bw.zip" -d "$TEMP_DIR"
-    $sudo chmod +x "$TEMP_DIR/bw"
-    $sudo mv "$TEMP_DIR/bw" /usr/local/bin/bw
-    rm -rf "$TEMP_DIR"
-fi
-{{- end }}
-
 # [Micromamba: Linux 通用二进制安装]
 {{ if not .headless -}}
 if ! command -v micromamba &> /dev/null; then
