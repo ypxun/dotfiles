@@ -5,26 +5,27 @@
 .vimrc
 # Windows 不运行 shell 脚本
 .chezmoiscripts/**
-{{- end }}
+{{ end }}
 
 {{- /* 2. 跨平台/特定模式排除 */ -}}
 # 如果不是“私人、无头、非临时”环境，则排除 authorized_keys
 # 这样 Mac、公司电脑、容器环境都不会产生这个文件
 {{- if not (and .personal .headless (not .ephemeral)) }}
 .ssh/authorized_keys
-{{- end }}
+{{ end }}
 
 {{- /* 2. macOS 独占软件排除 (AeroSpace, Hammerspoon) */ -}}
 {{- if ne .chezmoi.os "darwin" }}
 .aerospace.toml
 .hammerspoon/
 .hammerspoon/**
-{{- end }}
+.Brewfile
+{{ end }}
 
 # --- 3. 无头模式过滤 (WSL2/服务器) ---
 {{ if .headless -}}
 .wezterm.lua
-{{- end }}
+{{ end }}
 
 {{- /* 4. 隐私隔离墙：核心！ */ -}}
 # 如果不是个人设备，或者在临时环境（如 codespaces）中，不要同步私钥
@@ -34,20 +35,20 @@
 .gnupg/
 .gnupg/**
 .zshrc.secret
-{{- end }}
+{{ end }}
 
 # --- 如果是无头节点 (VPS/WSL2)，排除管理端专用的管理私钥 ---
 {{- if .headless }}
 .ssh/key_vps_root
 .ssh/key_vps_user
-{{- end }}
+{{ end }}
 
 {{- /* 5. 脚本排除 */ -}}
 # 只有在 Linux 下才跑 linux 文件夹里的脚本
 {{- if ne .chezmoi.os "linux" }}
 .chezmoiscripts/linux/**
-{{- end }}
+{{ end }}
 # 只有在 macOS 下才跑 darwin 文件夹里的脚本
 {{- if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
-{{- end }}
+{{ end }}
