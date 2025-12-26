@@ -16,7 +16,7 @@
 {{- end -}}
 
 {{- /* 3. 自动识别临时环境 (Codespaces, Docker, 等) */ -}}
-{{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "root" "ubuntu" "vscode") -}}
+{{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "ubuntu" "vscode") -}}
     {{- $ephemeral = true -}}
     {{- $headless = true -}}
 {{- end -}}
