@@ -1,0 +1,20 @@
+{{- $zshPlugins := dict 
+    "zsh-autosuggestions" "zsh-users/zsh-autosuggestions"
+    "zsh-syntax-highlighting" "zsh-users/zsh-syntax-highlighting"
+    "zsh-autocomplete" "marlonrichert/zsh-autocomplete" 
+-}}
+
+{{- range $name, $repo := $zshPlugins }}
+PLUGIN_DIR="$HOME/.oh-my-zsh/custom/plugins/{{ $name }}"
+if [ -d "$PLUGIN_DIR" ]; then
+    echo "  ✅ {{ $name }} 已就绪"
+else
+    echo "  🚀 正在克隆 {{ $name }}..."
+    if git clone --depth 1 https://github.com/{{ $repo }} "$PLUGIN_DIR"; then
+        echo "    ok!"
+    else
+        echo "    ❌ 克隆 {{ $name }} 失败，请检查网络"
+        # 这里可以选择不退出 exit 0，让其他插件继续
+    fi
+fi
+{{- end }}

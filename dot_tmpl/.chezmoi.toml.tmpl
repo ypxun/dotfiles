@@ -1,57 +1,55 @@
-{{- $email := promptStringOnce . "email" "Email address" -}}
-{{- $name := promptStringOnce . "name" "User name" -}}
+{{- /* 1. 环境初始化 */ -}}
+{{- $ephemeral := false -}}
+{{- $headless := false -}}
+{{- $personal := false -}}
+{{- $work := false -}}
 
-{{- /* 1. 安全获取 osID：Mac 下没有 osRelease.id，直接 fallback 到 .chezmoi.os */ -}}
+{{- /* 2. 操作系统与主机名探测 */ -}}
 {{- $osID := .chezmoi.os -}}
-{{- if (hasKey .chezmoi "osRelease") -}}
-    {{- if (hasKey .chezmoi.osRelease "id") -}}
-        {{- $osID = .chezmoi.osRelease.id -}}
+{{- if and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id") -}}
+    {{- $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{- $hostname := .chezmoi.hostname -}}
+{{- if eq .chezmoi.os "darwin" -}}
+    {{- $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
+{{- end -}}
+
+{{- /* 3. 自动识别临时环境 (Codespaces, Docker, 等) */ -}}
+{{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "root" "ubuntu" "vscode") -}}
+    {{- $ephemeral = true -}}
+    {{- $headless = true -}}
+{{- end -}}
+
+{{- /* 4. 身份核心逻辑：基于主机名的全自动识别 */ -}}
+{{- if not $ephemeral -}}
+    {{- if eq $hostname "pkmbp" "pk-pc" -}}
+        {{- $personal = true -}}
+        {{- $headless = false -}}
+    {{- else if eq $hostname "debian" -}}{{/* 这里填你 VPS 的主机名 */}}
+        {{- $personal = true -}}
+        {{- $headless = true -}}
+    {{- else if stdinIsATTY -}}
+        {{- $personal = promptBoolOnce . "personal" "是否为个人设备?" -}}
+        {{- $headless = promptBoolOnce . "headless" "是否为无头(服务器)模式?" -}}
+    {{- else -}}
+        {{- $ephemeral = true -}}
     {{- end -}}
 {{- end -}}
 
-{{- /* 2. 构造平台索引 Key (区分 Intel/ARM Mac) */ -}}
-{{- $platformKey := $osID -}}
-{{- if eq .chezmoi.os "darwin" -}}
-    {{- $platformKey = printf "darwin-%s" .chezmoi.arch -}}
-{{- end -}}
+{{- /* 5. 变量获取 */ -}}
+{{- $email := promptStringOnce . "email" "Git Email Address" -}}
+{{- $name := promptStringOnce . "name" "Git User Name" -}}
 
 [data]
     email = {{ $email | quote }}
     name = {{ $name | quote }}
+    personal = {{ $personal }}
+    headless = {{ $headless }}
+    ephemeral = {{ $ephemeral }}
     osid = {{ $osID | quote }}
+    hostname = {{ $hostname | quote }}
     
-    {{- $install_map := dict 
-        "debian" "sudo apt install -y" 
-        "ubuntu" "sudo apt install -y" 
-        "arch"   "sudo pacman -S --needed --noconfirm" 
-        "fedora" "sudo dnf install -y" 
-    -}}
-    # 如果是 Mac，这个值在脚本里不会被用到，给个空或者默认即可
-    install_cmd = {{ index $install_map $osID | default "" | quote }}
-    # 1. 共同包清单 (官方源核心工具)
-    common_packages = [
-        "chezmoi", "zoxide", "fzf", "ripgrep", "jq", 
-        "tree", "uv", "git", "git-delta", "nodejs", "npm", 
-        "fd", "bat"
-    ]
-
-    # 2. 增强包清单 (逻辑名，仅用于检测与手动指引)
-    enhanced_packages = [
-        "eza", "micromamba", "borders",
-        "zsh-autosuggestions", "zsh-syntax-highlighting", "zsh-autocomplete"
-    ]
-
-    # 3. Mamba 路径字典 (修正 Intel/ARM Mac 官方 Homebrew 路径)
-    {{- $mamba_paths := dict 
-        "darwin-arm64" "/opt/homebrew/opt/micromamba/bin/mamba" 
-        "darwin-amd64" "/usr/local/opt/micromamba/bin/mamba" 
-        "debian"       "/usr/local/bin/micromamba" 
-        "arch"         "/usr/bin/micromamba" 
-    }}
-    {{- /* 逻辑计算：优先使用 $platformKey 匹配，保底使用 /usr/local/bin/micromamba */ -}}
-    {{- $mamba_val := index $mamba_paths $platformKey | default "/usr/local/bin/micromamba" }}
-    mamba_exe = {{ $mamba_val | quote }}
-
 # --- 以下为你原有的全局配置 ---
 
 ignorePatterns = [

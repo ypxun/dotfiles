@@ -3,27 +3,38 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# --- 2. 第二优先级：Chezmoi 注入环境变量 ---
-export MAMBA_EXE={{ .mamba_exe | quote }}
-# 让 FZF 默认使用 fd (提速 + 忽略 .git/node_modules)
-# 放在这里，确保后续加载插件时该变量已存在
+# --- 2. 基础设施探测 ---
+
+# [Homebrew 初始化：仅限 macOS 必须通过绝对路径启动]
+{{ if eq .chezmoi.os "darwin" -}}
+{{- $brew := "/usr/local/bin/brew" }}{{ if eq .chezmoi.arch "arm64" }}{{ $brew = "/opt/homebrew/bin/brew" }}{{ end -}}
+if [[ -f {{ $brew | quote }} ]]; then
+    eval "$({{ $brew }} shellenv)"
+fi
+{{- end }}
+
+# [Micromamba 路径探测：完全去中心化]
+{{- $mambaPath := "" -}}
+{{- if lookPath "micromamba" -}}
+    {{- $mambaPath = lookPath "micromamba" -}}
+{{- else if lookPath "mamba" -}}
+    {{- $mambaPath = lookPath "mamba" -}}
+{{- end -}}
+
+# 只要在 PATH 中找到了，就注入变量；找不到，主体逻辑中的 if [[ -f "$MAMBA_EXE" ]] 自然会跳过
+{{ if $mambaPath -}}
+export MAMBA_EXE={{ $mambaPath | quote }}
+{{- end }}
+
+# [FZF 预设]
 export FZF_DEFAULT_COMMAND='fd --type f'
 
-{{ if eq .chezmoi.os "darwin" -}}
-{{- $brew_exe := "/usr/local/bin/brew" }}{{ if eq .chezmoi.arch "arm64" }}{{ $brew_exe = "/opt/homebrew/bin/brew" }}{{ end -}}
-[[ -f {{ $brew_exe | quote }} ]] && eval "$({{ $brew_exe }} shellenv)"
-{{- end }}
-
-# --- 3. 第三优先级：引入原始 zshrc 主体 ---
+# --- 3. 引入你的 zshrc 主体 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 
-# --- 4. 最终补丁：抹平跨平台命令名差异 ---
+# --- 4. 最后的命令抹平补丁 (在主体之后，确保拥有最终解释权) ---
+{{- $bat := "" }}{{ if lookPath "bat" }}{{ $bat = "bat" }}{{ else if lookPath "batcat" }}{{ $bat = "batcat" }}{{ end -}}
+{{ if $bat }}alias bat={{ $bat | quote }} && alias cat='{{ $bat }} -P'{{ end }}
 
-# 1. 差异化适配
-{{ if (or (eq .osid "debian") (eq .osid "ubuntu")) -}}
-alias fd='fdfind'
-alias bat='batcat'
-{{- end }}
-
-# 2. 现代工具别名 
-alias cat='bat -P'
+{{ if lookPath "fdfind" }}alias fd='fdfind'{{ end }}
+{{ if lookPath "eza" }}alias ls='eza --icons=always'{{ end }}

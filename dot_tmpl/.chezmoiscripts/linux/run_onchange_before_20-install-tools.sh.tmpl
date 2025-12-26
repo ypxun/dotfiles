@@ -1,0 +1,38 @@
+#!/bin/bash
+set -eufo pipefail
+{{ $sudo := "sudo " -}}{{ if eq .chezmoi.username "root" }}{{ $sudo = "" }}{{ end -}}
+
+# [Eza: 仅限 Debian/Ubuntu 三方源]
+{{ if eq .osid "debian" "ubuntu" -}}
+if ! command -v eza &> /dev/null; then
+    echo "✨ [2/3] 正在为 Debian/Ubuntu 配置 Eza 三方源..."
+    $sudo mkdir -p /etc/apt/keyrings
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | $sudo gpg --dearmor -o /etc/apt/keyrings/gierrt.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/gierrt.gpg] http://deb.gierrt.me/debian stable main" | $sudo tee /etc/apt/sources.list.d/gierrt.list
+    $sudo apt-get update && $sudo apt-get install -y eza
+fi
+{{- end }}
+
+# [Bitwarden CLI: 仅限 Personal 设备安装]
+{{ if .personal -}}
+if ! command -v bw &> /dev/null; then
+    echo "📥 正在为 Personal 设备安装 Bitwarden CLI..."
+    BW_URL="https://vault.bitwarden.com/download/?app=cli&platform=linux"
+    TEMP_DIR=$(mktemp -d)
+    curl -Ls "$BW_URL" -o "$TEMP_DIR/bw.zip"
+    unzip -q "$TEMP_DIR/bw.zip" -d "$TEMP_DIR"
+    $sudo chmod +x "$TEMP_DIR/bw"
+    $sudo mv "$TEMP_DIR/bw" /usr/local/bin/bw
+    rm -rf "$TEMP_DIR"
+fi
+{{- end }}
+
+# [Micromamba: Linux 通用二进制安装]
+{{ if not .headless -}}
+if ! command -v micromamba &> /dev/null; then
+    echo "🐍 [2/3] 正在从官方二进制安装 Micromamba..."
+    curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba --strip-components=1
+    $sudo mv micromamba /usr/local/bin/
+    $sudo chmod +x /usr/local/bin/micromamba
+fi
+{{- end }}

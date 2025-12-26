@@ -1,5 +1,4 @@
 # --- 1. 跨平台特殊处理 ---
-# WSL 特有处理
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
     alias open=explorer.exe
 fi
@@ -8,21 +7,21 @@ fi
 # 这里的 Instant Prompt 已由模板处理，此处只 source 配置文件
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# 通用变量
 export LANG=zh_CN.UTF-8
 [ -f ~/.zshrc.secret ] && source ~/.zshrc.secret
 
 # --- 3. Mamba (Micromamba) 初始化 ---
-# 利用模板注入的 $MAMBA_EXE，实现“装了就用，没装不报报错”
-if [[ -f "$MAMBA_EXE" ]]; then
+if [[ -n "$MAMBA_EXE" && -f "$MAMBA_EXE" ]]; then
     export MAMBA_ROOT_PREFIX="$HOME/mamba"
-    __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-    if [ $? -eq 0 ]; then 
-        eval "$__mamba_setup"
-    else 
-        alias mamba="$MAMBA_EXE"
-    fi
-    unset __mamba_setup
+    # 执行 Hook 动态生成环境配置
+    eval "$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)" || alias mamba="$MAMBA_EXE"
+    
+    # Mamba 环境快速切换
+    mact() {
+        local env
+        env=$("$MAMBA_EXE" env list | grep -v '^#' | grep -v '^$' | fzf --height 40% --reverse --header "切换 Mamba 环境:" | awk '{print $1}')
+        [ -n "$env" ] && mamba activate "$env"
+    }
 fi
 
 # --- 4. Oh My Zsh 框架配置 ---
@@ -33,40 +32,28 @@ zstyle ':omz:update' mode auto
 plugins=(
     git sudo colorize extract colored-man-pages fzf
     history-substring-search eza
-    zsh-autosuggestions
-    zsh-autocomplete
     docker docker-compose node npm
-    zsh-syntax-highlighting
+    zsh-autosuggestions zsh-autocomplete zsh-syntax-highlighting
 )
 
-source $ZSH/oh-my-zsh.sh
+# 仅在存在时 source
+[ -f "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
 
 # --- 5. 插件自定义配置 (必须在 source $ZSH 之后) ---
-# zsh-autocomplete 驯服脚本：只有按 Tab 或上下键时才选中
 zstyle ':autocomplete:*' insert-unambiguous yes
 zstyle ':autocomplete:*' widget-style menu-select
 
 # 通用别名
-alias ls="eza --icons=always"
 alias cz="chezmoi"
 alias cze="chezmoi edit"
 
 # 初始化 zoxide
-if command -v zoxide &> /dev/null; then
+if (( $+commands[zoxide] )); then
     eval "$(zoxide init zsh)"
     alias cd="z"
 fi
 
-# Mamba 环境管理快捷函数 (mact)
-if [[ -f "$MAMBA_EXE" ]]; then
-    mact() {
-        local env
-        env=$("$MAMBA_EXE" env list | grep -v '^#' | grep -v '^$' | fzf --height 40% --reverse --header "切换 Mamba 环境:" | awk '{print $1}')
-        [ -n "$env" ] && mamba activate "$env"
-    }
-fi
-
-# Mac 专用：Homebrew 备份与同步别名
+# Mac 专用：Homebrew 备份
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias bup="brew bundle dump --force --file=\"\$(chezmoi source-path)/../homebrew/Brewfile\" && chezmoi apply"
 fi

@@ -1,20 +1,54 @@
-# --- 1. Windows 排除项 ---
+{{- /* 1. Windows 特有排除 */ -}}
 {{- if eq .chezmoi.os "windows" }}
 .zshrc
 .p10k.zsh
 .vimrc
-install-packages.sh
+# Windows 不运行 shell 脚本
+.chezmoiscripts/**
 {{- end }}
 
-# --- 2. 非 macOS 排除项 (AeroSpace & Hammerspoon) ---
+{{- /* 2. 跨平台/特定模式排除 */ -}}
+# 如果不是“私人、无头、非临时”环境，则排除 authorized_keys
+# 这样 Mac、公司电脑、容器环境都不会产生这个文件
+{{- if not (and .personal .headless (not .ephemeral)) }}
+.ssh/authorized_keys
+{{- end }}
+
+{{- /* 2. macOS 独占软件排除 (AeroSpace, Hammerspoon) */ -}}
 {{- if ne .chezmoi.os "darwin" }}
 .aerospace.toml
-.hammerspoon/        # 注意加上斜杠，代表目录
+.hammerspoon/
 .hammerspoon/**
 {{- end }}
 
-# --- 3. 只有 macOS 和 Windows 才能拥有的 WezTerm ---
-# 既然你在 Linux (Debian/Arch) 上不用 WezTerm (可能用系统原生终端)
-{{- if and (ne .chezmoi.os "darwin") (ne .chezmoi.os "windows") }}
+# --- 3. 无头模式过滤 (WSL2/服务器) ---
+{{ if .headless -}}
 .wezterm.lua
 {{- end }}
+
+{{- /* 4. 隐私隔离墙：核心！ */ -}}
+# 如果不是个人设备，或者在临时环境（如 codespaces）中，不要同步私钥
+{{- if or (not .personal) .ephemeral }}
+.ssh/
+.ssh/**
+.gnupg/
+.gnupg/**
+.zshrc.secret
+{{- end }}
+
+# --- 如果是无头节点 (VPS/WSL2)，排除管理端专用的管理私钥 ---
+{{- if .headless }}
+.ssh/key_vps_root
+.ssh/key_vps_user
+{{- end }}
+
+{{- /* 5. 脚本排除 */ -}}
+# 只有在 Linux 下才跑 linux 文件夹里的脚本
+{{- if ne .chezmoi.os "linux" }}
+.chezmoiscripts/linux/**
+{{- end }}
+# 只有在 macOS 下才跑 darwin 文件夹里的脚本
+{{- if ne .chezmoi.os "darwin" }}
+.chezmoiscripts/darwin/**
+{{- end }}
+

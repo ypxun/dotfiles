@@ -1,0 +1,22 @@
+# --- 核心基础工具 ---
+zoxide
+fzf
+ripgrep
+jq
+tree
+git-delta
+curl
+wget
+git
+zsh
+bat
+fd
+eza
+unzip
+
+# --- 生产力工具 (非无头设备) ---
+{{- if not .headless }}
+nodejs
+npm
+uv
+{{- end }}

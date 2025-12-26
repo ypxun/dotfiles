@@ -1,0 +1,35 @@
+{{- if and .personal (not .ephemeral) -}}
+Host *
+    ServerAliveInterval 10
+    ServerAliveCountMax 60
+{{- if eq .chezmoi.os "darwin" }}
+    AddKeysToAgent yes
+    UseKeychain yes
+{{- end }}
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/github_ypxun
+
+{{ if not .headless }}
+{{- $vps := (bitwarden "item" "vps_kr_oracle") -}}
+{{- $fields := (bitwardenFields "item" "vps_kr_oracle") -}}
+{{- $ip := (index $vps.login.uris 0).uri -}}
+
+Host {{ $fields.alias.value }}
+    HostName {{ $ip }}
+    Port {{ $fields.port.value }}
+    User {{ $vps.login.username }}
+    IdentityFile ~/.ssh/key_vps_user
+
+Host {{ $fields.alias.value }}_root
+    HostName {{ $ip }}
+    Port {{ $fields.port.value }}
+    User {{ $fields.root_user.value }}
+    IdentityFile ~/.ssh/key_vps_root
+
+{{- end }}
+
+{{- end }}
+

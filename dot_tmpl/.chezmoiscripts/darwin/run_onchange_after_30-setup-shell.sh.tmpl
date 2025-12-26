@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eufo pipefail
+
+echo "🔌 [3/3] 正在同步 macOS Zsh 插件..."
+
+# 1. 插件克隆 (与 Linux 逻辑完全一致)
+{{ template "zsh-plugins.tmpl" . }}
+
+# 2. Shell 引导
+if [[ "$SHELL" != "$(command -v zsh)" ]]; then
+    echo -e "\033[1;33m提示: 请手动执行 chsh -s \$(command -v zsh) 切换默认 Shell\033[0m"
+fi
+
+echo "✨ 插件同步流程执行完毕！"

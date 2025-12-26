@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eufo pipefail
+
+echo "🔌 [3/3] 正在维护 Zsh 插件与 Shell 环境..."
+
+# 1. 插件克隆
+{{ template "zsh-plugins.tmpl" . }}
+
+# 2. Shell 引导 (采用你简化的版本)
+if [[ "$SHELL" != "$(command -v zsh)" ]]; then
+    echo -e "\033[1;33m提示: 请手动执行 chsh -s \$(command -v zsh) 切换默认 Shell\033[0m"
+fi
+
+echo "✨ 插件同步流程执行完毕！"

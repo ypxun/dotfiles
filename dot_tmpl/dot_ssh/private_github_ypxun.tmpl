@@ -1,0 +1,3 @@
+{{- if and .personal (not .ephemeral) -}}
+{{- (bitwarden "item" "github_ypxun").sshKey.privateKey -}}
+{{- end -}}

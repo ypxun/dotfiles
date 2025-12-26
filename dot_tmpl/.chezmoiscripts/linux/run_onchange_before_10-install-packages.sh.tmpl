@@ -1,0 +1,46 @@
+#!/bin/bash
+# 监控清单变化: {{ include (joinPath .chezmoi.workingTree "packages/pkgs.txt") | sha256sum }}
+set -eufo pipefail
+
+{{ $sudo := "sudo " -}}{{ if eq .chezmoi.username "root" }}{{ $sudo = "" }}{{ end -}}
+OS_ID={{ .osid | quote }}
+
+# 1. 提取并翻译包清单
+{{- $raw_pkgs := (include (joinPath .chezmoi.workingTree "packages/pkgs.txt") | splitList "\n") -}}
+{{- $install_list := list -}}
+
+{{- range $raw_pkgs -}}
+    {{- $p := . | trim -}}
+    {{- if and $p (not (hasPrefix "#" $p)) -}}
+        {{- $target := $p -}}
+        
+        {{- /* 针对 Debian/Ubuntu 的特殊名翻译 */ -}}
+        {{- if eq $.osid "debian" "ubuntu" -}}
+            {{- if eq $p "fd" }}{{ $target = "fd-find" }}{{ end -}}
+            {{- if or (eq $p "eza") (eq $p "micromamba") -}}
+                {{- $target = "" }}{{ /* 这两个包在 Debian 官方源无法直接装，标记为空，由脚本 20 处理 */ -}}
+            {{- end -}}
+        {{- end -}}
+        
+        {{- /* 针对 Arch 的名翻译 (Arch 源里 micromamba 通常叫 micromamba-bin 等，这里暂定原名或空) */ -}}
+        {{- if eq $.osid "arch" -}}
+            {{- if eq $p "micromamba" }}{{ $target = "" }}{{ /* Arch 建议也走脚本 20 的二进制安装，更稳定 */ }}{{ end -}}
+        {{- end -}}
+
+        {{- if $target }}{{ $install_list = append $install_list $target }}{{ end -}}
+    {{- end -}}
+{{- end -}}
+
+# 2. 执行安装
+case "$OS_ID" in
+    "debian"|"ubuntu")
+        $sudo apt-get update
+        INSTALL_CMD="$sudo apt-get install -y"
+        ;;
+    "arch")
+        INSTALL_CMD="$sudo pacman -S --needed --noconfirm"
+        ;;
+esac
+
+echo "📦 [1/3] 正在同步 $OS_ID 系统软件包..."
+$INSTALL_CMD {{ $install_list | uniq | sortAlpha | join " " }}
