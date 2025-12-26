@@ -1,10 +1,10 @@
-# 环境初始化
+{{- /* 1. 环境初始化 */ -}}
 {{- $ephemeral := false -}}
 {{- $headless := false -}}
 {{- $personal := false -}}
 {{- $work := false -}}
 
-# 操作系统与主机名探测 
+{{- /* 2. 操作系统与主机名探测 */ -}}
 {{- $osID := .chezmoi.os -}}
 {{- if hasKey .chezmoi.osRelease "id" -}}
     {{- $osID = .chezmoi.osRelease.id -}} {{/* 直接用 debian, ubuntu, arch 等，不加 linux- 前缀 */}}
@@ -15,18 +15,18 @@
     {{- $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
 {{- end -}}
 
-# 自动识别临时环境 (Codespaces, Docker, 等) 
+{{- /* 3. 自动识别临时环境 (Codespaces, Docker, 等) */ -}}
 {{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "ubuntu" "vscode") -}}
     {{- $ephemeral = true -}}
     {{- $headless = true -}}
 {{- end -}}
 
-# 身份核心逻辑：基于主机名的全自动识别
+{{- /* 4. 身份核心逻辑：基于主机名的全自动识别 */ -}}
 {{- if not $ephemeral -}}
     {{- if eq $hostname "pkmbp" "pk-pc" -}}
         {{- $personal = true -}}
         {{- $headless = false -}}
-    {{- else if eq $hostname "debian" -}}
+    {{- else if eq $hostname "debian" -}}{{/* 这里填你 VPS 的主机名 */}}
         {{- $personal = true -}}
         {{- $headless = true -}}
     {{- else if stdinIsATTY -}}
@@ -37,7 +37,7 @@
     {{- end -}}
 {{- end -}}
 
-# 变量获取 
+{{- /* 5. 变量获取 */ -}}
 {{- $email := promptStringOnce . "email" "Git Email Address" -}}
 {{- $name := promptStringOnce . "name" "Git User Name" -}}
 
@@ -76,3 +76,4 @@ ignorePatterns = [
 
 [apply]
     refreshPeriod = "1m"
+    
