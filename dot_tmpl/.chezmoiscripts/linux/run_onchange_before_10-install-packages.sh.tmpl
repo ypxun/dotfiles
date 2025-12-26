@@ -12,7 +12,7 @@ sudo={{ $sudo_val | quote }}
 OS_ID={{ .osid | quote }}
 
 # 1. 提取并翻译包清单
-{{- $raw_pkgs := (include (joinPath .chezmoi.workingTree "packages/pkgs.txt") | splitList "\n") -}}
+{{- $raw_pkgs := (executeTemplate (joinPath .chezmoi.workingTree "packages/pkgs.txt") . | splitList "\n") -}}
 {{- $install_list := list -}}
 
 {{- range $raw_pkgs -}}
