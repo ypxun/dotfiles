@@ -1,6 +1,15 @@
 #!/bin/bash
 set -eufo pipefail
-{{ $sudo := "sudo " -}}{{ if eq .chezmoi.username "root" }}{{ $sudo = "" }}{{ end -}}
+{{ $sudo_val := "sudo " -}}
+{{- if eq .chezmoi.username "root" -}}
+    {{- $sudo_val = "" -}}
+{{- end -}}
+
+# 将 Go 变量的值赋给 Shell 变量 sudo
+sudo={{ $sudo_val | quote }}
+OS_ID={{ .osid | quote }}
+
+echo "🛠️  [2/3] 正在检查三方软件包 (Eza / Micromamba)..."
 
 # [Eza: 仅限 Debian/Ubuntu 三方源]
 {{ if eq .osid "debian" "ubuntu" -}}
@@ -10,6 +19,8 @@ if ! command -v eza &> /dev/null; then
     wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | $sudo gpg --dearmor -o /etc/apt/keyrings/gierrt.gpg
     echo "deb [signed-by=/etc/apt/keyrings/gierrt.gpg] http://deb.gierrt.me/debian stable main" | $sudo tee /etc/apt/sources.list.d/gierrt.list
     $sudo apt-get update && $sudo apt-get install -y eza
+else
+    echo "  ✅ Eza 已安装，跳过配置。"
 fi
 {{- end }}
 
@@ -20,5 +31,9 @@ if ! command -v micromamba &> /dev/null; then
     curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba --strip-components=1
     $sudo mv micromamba /usr/local/bin/
     $sudo chmod +x /usr/local/bin/micromamba
+else
+    echo "  ✅ Micromamba 已安装，跳过。"
 fi
+{{ else -}}
+echo "  ⏭️  检测为无头模式 (Headless)，跳过 Micromamba 安装。"
 {{- end }}
