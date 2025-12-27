@@ -57,3 +57,4 @@ fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias bup="brew bundle dump --force --file=\"\$(chezmoi source-path)/../homebrew/Brewfile\" && chezmoi apply"
 fi
+ 
