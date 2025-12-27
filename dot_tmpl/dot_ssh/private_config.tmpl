@@ -9,24 +9,27 @@ Host github.com
     User git
     IdentityFile ~/.ssh/github_ypxun
 
+# === 动态加载 VPS 列表 ===
 {{ if not .headless }}
-{{- $vps := (bitwarden "item" "vps_kr_oracle") -}}
-{{- $fields := (bitwardenFields "item" "vps_kr_oracle") -}}
+{{- range .vps_items }}
+{{- $vps := (bitwarden "item" .) -}}
+{{- $fields := (bitwardenFields "item" .) -}}
+{{- $alias := $fields.alias.value -}}
 {{- $ip := (index $vps.login.uris 0).uri -}}
 
-Host {{ $fields.alias.value }}
+Host {{ $alias }}
     HostName {{ $ip }}
     Port {{ $fields.port.value }}
     User {{ $vps.login.username }}
     IdentityFile ~/.ssh/key_vps_user
 
-Host {{ $fields.alias.value }}_root
+Host {{ $alias }}_root
     HostName {{ $ip }}
     Port {{ $fields.port.value }}
     User {{ $fields.root_user.value }}
     IdentityFile ~/.ssh/key_vps_root
 
+{{ end -}}
 {{- end }}
 
-{{- end }}
-
+{{- end -}}
