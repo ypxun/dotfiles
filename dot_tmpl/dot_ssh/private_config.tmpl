@@ -2,10 +2,7 @@
 Host *
     ServerAliveInterval 10
     ServerAliveCountMax 60
-{{- if eq .chezmoi.os "darwin" }}
-    AddKeysToAgent yes
-    UseKeychain yes
-{{- end }}
+    IdentitiesOnly yes
 
 Host github.com
     HostName github.com
