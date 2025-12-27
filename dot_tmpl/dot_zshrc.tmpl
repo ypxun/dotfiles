@@ -26,6 +26,11 @@ fi
 export MAMBA_EXE={{ $mambaPath | quote }}
 {{- end }}
 
+# [环境变量]
+if [[ -d "$HOME/.local/bin" ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
 # [FZF 预设]
 export FZF_DEFAULT_COMMAND='fd --type f'
 
