@@ -28,7 +28,7 @@ fi
 {{ if not .headless -}}
 if ! command -v micromamba &> /dev/null; then
     echo "🐍 [2/3] 正在从官方二进制安装 Micromamba..."
-    curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba --strip-components=1
+    curl -Lfo micromamba https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64
     $sudo mv micromamba /usr/local/bin/
     $sudo chmod +x /usr/local/bin/micromamba
 else
