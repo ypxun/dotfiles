@@ -37,3 +37,15 @@ fi
 {{ else -}}
 echo "  ⏭️  检测为无头模式 (Headless)，跳过 Micromamba 安装。"
 {{- end }}
+
+# [uv: 官方独立安装]
+{{ if not .headless -}}
+if ! command -v uv &> /dev/null; then
+    echo "🚀 [2/3] 正在通过官方脚本安装 uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+else
+    echo "  ✅ uv 已安装，跳过。"
+fi
+{{- else -}}
+echo "  ⏭️  检测为无头模式 (Headless)，跳过 uv 安装。"
+{{- end }}

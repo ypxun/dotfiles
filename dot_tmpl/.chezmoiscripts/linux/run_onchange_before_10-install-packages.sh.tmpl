@@ -23,7 +23,7 @@ OS_ID={{ .osid | quote }}
         {{- /* 针对 Debian、Ubuntu 的特殊名翻译 */ -}}
         {{- if eq $.osid "debian" "ubuntu" -}}
             {{- if eq $p "fd" }}{{ $target = "fd-find" }}{{ end -}}
-            {{- if or (eq $p "eza") (eq $p "micromamba") -}}
+            {{- if or (eq $p "eza") (eq $p "micromamba") (eq $p "uv") -}}
                 {{- $target = "" }}
             {{- end -}}
         {{- end -}}
