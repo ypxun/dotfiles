@@ -4,6 +4,10 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # --- 2. 基础设施探测 ---
+# [环境变量]
+if [[ -d "$HOME/.local/bin" ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
 
 # [Homebrew 初始化：仅限 macOS 必须通过绝对路径启动]
 {{ if eq .chezmoi.os "darwin" -}}
@@ -37,11 +41,6 @@ fi
 {{ if $mambaPath -}}
 export MAMBA_EXE={{ $mambaPath | quote }}
 {{- end }}
-
-# [环境变量]
-if [[ -d "$HOME/.local/bin" ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
 
 # [FZF 预设]
 export FZF_DEFAULT_COMMAND='fd --type f'

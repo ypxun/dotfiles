@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eufo pipefail
 
+# 监控清单变化: 
+# {{ include (joinPath .chezmoi.workingTree "zsh/zsh_plugins.txt") | sha256sum }}
+
 echo "🔌 [3/3] 正在维护 Zsh 插件与 Shell 环境..."
 
 # 1. 插件克隆

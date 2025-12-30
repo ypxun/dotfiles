@@ -1,0 +1,34 @@
+{{- $antidotePath := "" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+    {{- /* macOS 分支：区分 Apple Silicon 和 Intel */ -}}
+    {{- if eq .chezmoi.arch "arm64" -}}
+        {{- /* M 芯片 Mac 路径 */ -}}
+        {{- $antidotePath = "/opt/homebrew/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- else -}}
+        {{- /* Intel Mac 路径 */ -}}
+        {{- $antidotePath = "/usr/local/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- end -}}
+{{- else -}}
+    {{- /* Linux 分支：统一 Git Clone 路径 */ -}}
+    {{- $antidotePath = "$HOME/.antidote/antidote.zsh" -}}
+{{- end -}}
+
+{{- /* 2. Linux 自动安装 */ -}}
+{{ if eq .chezmoi.os "linux" -}}
+if [ ! -d "$HOME/.antidote" ]; then
+    echo "🚀 [Linux] 正在克隆 Antidote..."
+    git clone --depth=1 https://github.com/mattmc3/antidote.git "$HOME/.antidote"
+fi
+{{- end }}
+
+{{- /* 3. 执行静态编译 */ -}}
+# 监控清单变化 (严格使用 workingTree): 
+# {{ include (joinPath .chezmoi.workingTree "zsh/zsh_plugins.txt") | sha256sum }}
+
+if [ -f {{ $antidotePath | quote }} ]; then
+    echo "⚡ 正在生成静态插件缓存..."
+    zsh -c "source {{ $antidotePath }} && antidote bundle < $HOME/.zsh_plugins.txt > $HOME/.zsh_plugins.zsh"
+else
+    echo "❌ 找不到 Antidote 入口: {{ $antidotePath }}"
+    exit 1
+fi
