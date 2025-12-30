@@ -1,14 +1,12 @@
 # --- [1. 补全与环境初始化 (绝对优先级)] ---
 mattmc3/ez-compinit          # 必须第一！先定义 compdef，解决所有报错
 getantidote/use-omz          # 紧跟其后，初始化 OMZ 变量环境
-
-# --- [2. OMZ 核心库] ---
 ohmyzsh/ohmyzsh path:lib     # 此时 compdef 已存在，加载这里不再报错
 
-# --- [3. 主题] ---
+# --- [2. 主题] ---
 romkatv/powerlevel10k
 
-# --- [4. 其他插件] ---
+# --- [3. 其他插件] ---
 ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/sudo
 ohmyzsh/ohmyzsh path:plugins/extract
@@ -21,8 +19,11 @@ ohmyzsh/ohmyzsh path:plugins/node
 ohmyzsh/ohmyzsh path:plugins/npm
 ohmyzsh/ohmyzsh path:plugins/eza
 
-# --- [5. 三方增强] ---
+# --- [4. 三方增强] ---
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
+
+# 【核心变动】：把 autocomplete 放在最后，让它接管所有的输入控制
 marlonrichert/zsh-autocomplete
+# 【核心变动】：语法高亮必须是最后加载的，因为它要给所有前面的东西上色
 zsh-users/zsh-syntax-highlighting
