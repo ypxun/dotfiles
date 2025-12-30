@@ -1,4 +1,5 @@
 # --- [1. 补全与环境初始化 (绝对优先级)] ---
+zsh-users/zsh-completions kind:fpath # 注意：zsh-completions 必须放在 ez-compinit 之前！
 mattmc3/ez-compinit          # 必须第一！先定义 compdef，解决所有报错
 getantidote/use-omz          # 紧跟其后，初始化 OMZ 变量环境
 ohmyzsh/ohmyzsh path:lib     # 此时 compdef 已存在，加载这里不再报错
