@@ -1,8 +1,11 @@
-# Oh My Zsh 核心库 (必须)
+# --- [1. 环境准备] ---
 ohmyzsh/ohmyzsh path:lib
+getantidote/use-omz          # 补全 OMZ 环境缺失
+mattmc3/ez-compinit          
+# --- [2. 主题] ---
 romkatv/powerlevel10k
 
-# Oh My Zsh 插件
+# --- [3. OMZ 插件] ---
 ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/sudo
 ohmyzsh/ohmyzsh path:plugins/extract
@@ -15,7 +18,7 @@ ohmyzsh/ohmyzsh path:plugins/node
 ohmyzsh/ohmyzsh path:plugins/npm
 ohmyzsh/ohmyzsh path:plugins/eza
 
-# 外部插件
+# --- [4. 三方增强] ---
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
 marlonrichert/zsh-autocomplete

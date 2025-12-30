@@ -57,11 +57,11 @@ if [[ -f {{ $antidotePath | quote }} ]]; then
     fi
 fi
 
-# --- 3. 引入你的 zshrc 主体 (真身) ---
+# --- 4. 引入你的 zshrc 主体 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 {{ "" }}
 
-# --- 4. 最后的命令抹平补丁 (在主体之后，确保拥有最终解释权) ---
+# --- 5. 最后的命令抹平补丁 (在主体之后，确保拥有最终解释权) ---
 {{ $bat := "" -}}
 {{- if lookPath "bat" -}}
     {{- $bat = "bat" -}}
