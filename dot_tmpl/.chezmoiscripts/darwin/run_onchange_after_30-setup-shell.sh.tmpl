@@ -1,14 +1,33 @@
 #!/bin/bash
 set -eufo pipefail
+# 监控插件清单变化: {{ include (joinPath .chezmoi.workingTree "zsh/zsh_plugins.txt") | sha256sum }}
 
 echo "🔌 [3/3] 正在同步 macOS Zsh 插件..."
 
-# 1. 插件克隆 (与 Linux 逻辑完全一致)
-{{ template "zsh-plugins.tmpl" . }}
+# 1. 确定 Antidote 路径 (严格遵循 Brew 官方文档路径)
+{{- $antidotePath := "" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+    {{- if eq .chezmoi.arch "arm64" -}}
+        # Apple Silicon (M1/M2/M3)
+        {{- $antidotePath = "/opt/homebrew/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- else -}}
+        # Intel Mac
+        {{- $antidotePath = "/usr/local/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- end -}}
+{{- else -}}
+    # Linux (假设你以后手动安装在 ~/.antidote)
+    {{- $antidotePath = "$HOME/.antidote/antidote.zsh" -}}
+{{- end -}}
 
-# 2. Shell 引导
-if [[ "$SHELL" != "$(command -v zsh)" ]]; then
-    echo -e "\033[1;33m提示: 请手动执行 chsh -s \$(command -v zsh) 切换默认 Shell\033[0m"
+# 2. 静态生成插件加载脚本
+if [ -f {{ $antidotePath | quote }} ]; then
+    echo "⚡ 正在通过 Antidote 编译插件缓存..."
+    # 强制重新下载并打包所有插件
+    zsh -c "source {{ $antidotePath }} && antidote bundle < ~/.zsh_plugins.txt > ~/.zsh_plugins.zsh"
+else
+    echo "❌ 路径错误! 找不到 Antidote: {{ $antidotePath }}"
+    echo "请检查 brew info antidote 确认安装路径。"
+    exit 1
 fi
 
-echo "✨ 插件同步流程执行完毕！"
+echo "✨ Antidote 插件编译完毕！"

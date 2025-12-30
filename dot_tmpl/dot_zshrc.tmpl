@@ -13,6 +13,18 @@ if [[ -f {{ $brew | quote }} ]]; then
 fi
 {{- end }}
 
+# [Antidote 路径校准：采用官方推荐的 opt 软链接路径]
+{{- $antidotePath := "" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+    {{- if eq .chezmoi.arch "arm64" -}}
+        {{- $antidotePath = "/opt/homebrew/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- else -}}
+        {{- $antidotePath = "/usr/local/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- end -}}
+{{- else -}}
+    {{- $antidotePath = "$HOME/.antidote/antidote.zsh" -}}
+{{- end -}}
+
 # [Micromamba 路径探测：完全去中心化]
 {{- $mambaPath := "" -}}
 {{- if lookPath "micromamba" -}}
@@ -33,6 +45,17 @@ fi
 
 # [FZF 预设]
 export FZF_DEFAULT_COMMAND='fd --type f'
+
+# --- 3. Antidote 独立加载 (在真身之前) ---
+if [[ -f {{ $antidotePath | quote }} ]]; then
+    source {{ $antidotePath | quote }}
+    # 优先使用脚本生成的静态缓存，如果没生成则动态加载
+    if [[ -f ~/.zsh_plugins.zsh ]]; then
+        source ~/.zsh_plugins.zsh
+    else
+        antidote load ~/.zsh_plugins.txt ~/.zsh_plugins.zsh
+    fi
+fi
 
 # --- 3. 引入你的 zshrc 主体 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}

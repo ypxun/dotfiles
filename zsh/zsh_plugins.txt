@@ -1,0 +1,22 @@
+# Oh My Zsh 核心库 (必须)
+ohmyzsh/ohmyzsh path:lib
+romkatv/powerlevel10k
+
+# Oh My Zsh 插件
+ohmyzsh/ohmyzsh path:plugins/git
+ohmyzsh/ohmyzsh path:plugins/sudo
+ohmyzsh/ohmyzsh path:plugins/extract
+ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+ohmyzsh/ohmyzsh path:plugins/colorize
+ohmyzsh/ohmyzsh path:plugins/fzf
+ohmyzsh/ohmyzsh path:plugins/docker
+ohmyzsh/ohmyzsh path:plugins/docker-compose
+ohmyzsh/ohmyzsh path:plugins/node
+ohmyzsh/ohmyzsh path:plugins/npm
+ohmyzsh/ohmyzsh path:plugins/eza
+
+# 外部插件
+zsh-users/zsh-autosuggestions
+zsh-users/zsh-history-substring-search
+marlonrichert/zsh-autocomplete
+zsh-users/zsh-syntax-highlighting
