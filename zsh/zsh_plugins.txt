@@ -1,11 +1,14 @@
-# --- [1. 环境准备] ---
-ohmyzsh/ohmyzsh path:lib
-getantidote/use-omz          # 补全 OMZ 环境缺失
-mattmc3/ez-compinit          
-# --- [2. 主题] ---
+# --- [1. 补全与环境初始化 (绝对优先级)] ---
+mattmc3/ez-compinit          # 必须第一！先定义 compdef，解决所有报错
+getantidote/use-omz          # 紧跟其后，初始化 OMZ 变量环境
+
+# --- [2. OMZ 核心库] ---
+ohmyzsh/ohmyzsh path:lib     # 此时 compdef 已存在，加载这里不再报错
+
+# --- [3. 主题] ---
 romkatv/powerlevel10k
 
-# --- [3. OMZ 插件] ---
+# --- [4. 其他插件] ---
 ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/sudo
 ohmyzsh/ohmyzsh path:plugins/extract
@@ -18,7 +21,7 @@ ohmyzsh/ohmyzsh path:plugins/node
 ohmyzsh/ohmyzsh path:plugins/npm
 ohmyzsh/ohmyzsh path:plugins/eza
 
-# --- [4. 三方增强] ---
+# --- [5. 三方增强] ---
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
 marlonrichert/zsh-autocomplete
