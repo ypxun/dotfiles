@@ -10,7 +10,7 @@ echo "🔌 [3/3] 正在维护 Zsh 插件环境..."
 {{ template "zsh-plugins.tmpl" . }}
 
 if [[ "$SHELL" != "$(command -v zsh)" ]]; then
-    echo -e "\033[1;33m提示: 请手动执行 chsh -s \$(command -v zsh) 切换默认 Shell\033[0m"
+    echo -e "提示: 请手动执行 chsh -s $(command -v zsh) 切换默认 Shell"
 fi
 
 echo "✨ 插件同步执行完毕！"
