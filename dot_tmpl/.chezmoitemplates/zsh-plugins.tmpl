@@ -14,12 +14,12 @@
 {{- end -}}
 
 {{- /* 2. Linux 自动安装 */ -}}
-{{ if eq .chezmoi.os "linux" -}}
+{{ if eq .chezmoi.os "linux" }}
 if [ ! -d "$HOME/.antidote" ]; then
     echo "🚀 [Linux] 正在克隆 Antidote..."
     git clone --depth=1 https://github.com/mattmc3/antidote.git "$HOME/.antidote"
 fi
-{{- end }}
+{{ end }}
 
 {{- /* 3. 执行静态编译 */ -}}
 # 监控清单变化 (严格使用 workingTree): 
