@@ -14,10 +14,10 @@ local is_mac = wezterm.target_triple:find("apple") ~= nil
 config.initial_cols = 120
 config.initial_rows = 40
 -- 更加严谨的跨平台字体匹配
-local font_name = is_mac and "JetBrainsMono Nerd Font" or "MesloLGS Nerd Font"
+-- local font_name = is_mac and "JetBrainsMono Nerd Font" or "MesloLGS Nerd Font"
 
 config.font = wezterm.font_with_fallback({
-  font_name,         -- 根据平台自动选择最准确的名字
+  "JetBrainsMono Nerd Font",         -- 根据平台自动选择最准确的名字
   "JetBrains Mono",  -- 保底
 })
 config.font_size = is_mac and 13 or 11 -- Mac 用 13，Win 用 11 视觉上更接近
