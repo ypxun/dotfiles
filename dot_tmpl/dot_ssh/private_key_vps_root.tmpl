@@ -1,3 +1,3 @@
-{{- if and .personal (not .headless) (not .ephemeral) -}}
+{{- if and .personal (or (not .headless) .is_wsl) (not .ephemeral) -}}j
 {{- (bitwarden "item" "key_vps_root").sshKey.privateKey -}}
 {{- end -}}

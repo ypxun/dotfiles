@@ -10,7 +10,7 @@ Host github.com
     IdentityFile ~/.ssh/github_ypxun
 
 # === 动态加载 VPS 列表 ===
-{{ if not .headless }}
+{{- if or (not .headless) .is_wsl }}
 {{- range .vps_items }}
 {{- $vps := (bitwarden "item" .) -}}
 {{- $fields := (bitwardenFields "item" .) -}}
