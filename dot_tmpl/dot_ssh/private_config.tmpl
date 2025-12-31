@@ -1,4 +1,4 @@
-{{- if and .personal (not .ephemeral) -}}
+{{- if and .personal (not .ephemeral) }}
 Host *
     ServerAliveInterval 10
     ServerAliveCountMax 60
@@ -10,13 +10,12 @@ Host github.com
     IdentityFile ~/.ssh/github_ypxun
 
 # === 动态加载 VPS 列表 ===
-{{- if or (not .headless) .is_wsl }}
-{{- range .vps_items }}
-{{- $vps := (bitwarden "item" .) -}}
-{{- $fields := (bitwardenFields "item" .) -}}
-{{- $alias := $fields.alias.value -}}
-{{- $ip := (index $vps.login.uris 0).uri -}}
-
+{{ if or (not .headless) .is_wsl -}}
+{{ range .vps_items -}}
+{{ $vps := (bitwarden "item" .) -}}
+{{ $fields := (bitwardenFields "item" .) -}}
+{{ $alias := $fields.alias.value -}}
+{{ $ip := (index $vps.login.uris 0).uri }}
 Host {{ $alias }}
     HostName {{ $ip }}
     Port {{ $fields.port.value }}
@@ -30,6 +29,5 @@ Host {{ $alias }}_root
     IdentityFile ~/.ssh/key_vps_root
 
 {{ end -}}
-{{- end }}
-
-{{- end -}}
+{{ end -}}
+{{ end -}}
