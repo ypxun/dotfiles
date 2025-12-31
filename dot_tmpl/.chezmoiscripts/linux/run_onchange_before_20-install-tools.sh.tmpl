@@ -9,7 +9,7 @@ set -eufo pipefail
 sudo={{ $sudo_val | quote }}
 OS_ID={{ .osid | quote }}
 
-echo "🛠️  [2/3] 正在检查三方软件包 (Eza / Micromamba)..."
+echo "🛠️  [2/3] 正在检查三方软件包 (Eza / Micromamba / uv)..."
 
 # [Eza: 仅限 Debian/Ubuntu 三方源]
 {{ if eq .osid "debian" "ubuntu" -}}
@@ -25,7 +25,7 @@ fi
 {{- end }}
 
 # [Micromamba: Linux 通用二进制安装]
-{{ if not .headless -}}
+{{ if or (not .headless) .is_wsl -}}
 if ! command -v micromamba &> /dev/null; then
     echo "🐍 [2/3] 正在从官方二进制安装 Micromamba..."
     curl -Lfo micromamba https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64
@@ -35,11 +35,11 @@ else
     echo "  ✅ Micromamba 已安装，跳过。"
 fi
 {{ else -}}
-echo "  ⏭️  检测为无头模式 (Headless)，跳过 Micromamba 安装。"
+echo "  ⏭️  检测为纯远程无头模式 (VPS)，跳过 Micromamba 安装。"
 {{- end }}
 
 # [uv: 官方独立安装]
-{{ if not .headless -}}
+{{ if or (not .headless) .is_wsl -}}
 if ! command -v uv &> /dev/null; then
     echo "🚀 [2/3] 正在通过官方脚本安装 uv..."
     curl -LsSf https://astral.sh/uv/install.sh | UV_NO_MODIFY_PATH=1 sh
@@ -47,5 +47,5 @@ else
     echo "  ✅ uv 已安装，跳过。"
 fi
 {{- else -}}
-echo "  ⏭️  检测为无头模式 (Headless)，跳过 uv 安装。"
+echo "  ⏭️  检测为纯远程无头模式 (VPS)，跳过 uv 安装。"
 {{- end }}
