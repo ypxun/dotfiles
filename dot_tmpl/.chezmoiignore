@@ -25,7 +25,11 @@
 # --- 3. 无头模式过滤 (WSL2/服务器) ---
 {{ if .headless -}}
 .wezterm.lua
-{{ end }}
+{{- if not .is_wsl }}
+.ssh/key_vps_root
+.ssh/key_vps_user
+{{- end }}
+{{- end }}
 
 {{- /* 4. 隐私隔离墙：核心！ */ -}}
 # 如果不是个人设备，或者在临时环境（如 codespaces）中，不要同步私钥
@@ -35,12 +39,6 @@
 .gnupg/
 .gnupg/**
 .zshrc.secret
-{{ end }}
-
-# --- 如果是无头节点 (VPS/WSL2)，排除管理端专用的管理私钥 ---
-{{- if .headless }}
-.ssh/key_vps_root
-.ssh/key_vps_user
 {{ end }}
 
 {{- /* 5. 脚本排除 */ -}}

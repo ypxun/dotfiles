@@ -1,7 +1,14 @@
 # --- 1. 跨平台特殊处理 ---
-if [[ -n "$WSL_DISTRO_NAME" ]]; then
-    alias open=explorer.exe
+{{ if .is_wsl -}}
+# 识别到是 pk-pc 的 WSL2 环境
+alias open=explorer.exe
+if [ -d "{{ .scoop_shims }}" ]; then
+    export PATH="$PATH:{{ .scoop_shims }}"
 fi
+{{- else if (env "WSL_DISTRO_NAME") -}}
+# 兜底旧逻辑
+alias open=explorer.exe
+{{- end }}
 
 # --- 2. 环境配置与 P10K ---
 # 这里的 Instant Prompt 已由模板处理，此处只 source 配置文件

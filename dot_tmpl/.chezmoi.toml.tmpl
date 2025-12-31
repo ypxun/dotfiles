@@ -3,11 +3,17 @@
 {{- $headless := false -}}
 {{- $personal := false -}}
 {{- $work := false -}}
+{{- $is_wsl := false -}}
 
 {{- /* 2. 操作系统与主机名探测 */ -}}
 {{- $osID := .chezmoi.os -}}
 {{- if hasKey .chezmoi.osRelease "id" -}}
     {{- $osID = .chezmoi.osRelease.id -}} {{/* 直接用 debian, ubuntu, arch 等，不加 linux- 前缀 */}}
+{{- end -}}
+
+{{- /* 精准探测 WSL2 - 核心新增 */ -}}
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+    {{- $is_wsl = true -}}
 {{- end -}}
 
 {{- $hostname := .chezmoi.hostname -}}
@@ -25,7 +31,11 @@
 {{- if not $ephemeral -}}
     {{- if eq $hostname "pkmbp" "pk-pc" -}}
         {{- $personal = true -}}
-        {{- $headless = false -}}
+        {{- if $is_wsl -}}
+            {{- $headless = true -}} {{/* WSL2 虽为无头，但通过 is_wsl 标识区分 */}}
+        {{- else -}}
+            {{- $headless = false -}}
+        {{- end -}}
     {{- else if eq $hostname "debian" -}}{{/* 这里填你 VPS 的主机名 */}}
         {{- $personal = true -}}
         {{- $headless = true -}}
@@ -45,11 +55,14 @@
     email = {{ $email | quote }}
     name = {{ $name | quote }}
     personal = {{ $personal }}
+    work = {{ $work }}
     headless = {{ $headless }}
+    is_wsl = {{ $is_wsl }}
     ephemeral = {{ $ephemeral }}
     osid = {{ $osID | quote }}
     hostname = {{ $hostname | quote }}
     vps_items = ["vps_kr_oracle", "vps_jp_claw", "vps_sg_mikyhost"] 
+    scoop_shims = "/mnt/f/scoop/ypk/shims"
 # --- 以下为你原有的全局配置 ---
 
 ignorePatterns = [
