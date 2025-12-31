@@ -56,11 +56,22 @@ if [[ -f {{ $antidotePath | quote }} ]]; then
     fi
 fi
 
-# --- 4. 引入你的 zshrc 主体 (真身) ---
+# --- 5. 跨平台特殊处理 (在此处处理动态逻辑) ---
+{{ if .is_wsl -}}
+# 识别到是 pk-pc 的 WSL2 环境，注入 Windows 侧 Scoop 路径
+alias open=explorer.exe
+if [ -d {{ .scoop_shims | quote }} ]; then
+    export PATH="$PATH:{{ .scoop_shims }}"
+fi
+{{- else if (env "WSL_DISTRO_NAME") -}}
+alias open=explorer.exe
+{{- end }}
+
+# --- 5. 引入你的 zshrc 主体 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 {{ "" }}
 
-# --- 5. 最后的命令抹平补丁 (在主体之后，确保拥有最终解释权) ---
+# --- 6. 最后的命令抹平补丁 (在主体之后，确保拥有最终解释权) ---
 {{ $bat := "" -}}
 {{- if lookPath "bat" -}}
     {{- $bat = "bat" -}}

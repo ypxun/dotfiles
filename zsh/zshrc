@@ -1,23 +1,11 @@
-# --- 1. 跨平台特殊处理 ---
-{{ if .is_wsl -}}
-# 识别到是 pk-pc 的 WSL2 环境
-alias open=explorer.exe
-if [ -d "{{ .scoop_shims }}" ]; then
-    export PATH="$PATH:{{ .scoop_shims }}"
-fi
-{{- else if (env "WSL_DISTRO_NAME") -}}
-# 兜底旧逻辑
-alias open=explorer.exe
-{{- end }}
-
-# --- 2. 环境配置与 P10K ---
+# --- 1. 环境配置与 P10K ---
 # 这里的 Instant Prompt 已由模板处理，此处只 source 配置文件
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 export LANG=zh_CN.UTF-8
 [ -f ~/.zshrc.secret ] && source ~/.zshrc.secret
 
-# --- 3. Mamba (Micromamba) 初始化 ---
+# --- 2. Mamba (Micromamba) 初始化 ---
 if [[ -n "$MAMBA_EXE" && -f "$MAMBA_EXE" ]]; then
     export MAMBA_ROOT_PREFIX="$HOME/mamba"
     # 执行 Hook 动态生成环境配置
@@ -31,11 +19,11 @@ if [[ -n "$MAMBA_EXE" && -f "$MAMBA_EXE" ]]; then
     }
 fi
 
-# --- 4. 插件自定义配置 (必须在 source $ZSH 之后) ---
+# --- 3. 插件自定义配置 (必须在 source $ZSH 之后) ---
 zstyle ':autocomplete:*' insert-unambiguous yes
 zstyle ':autocomplete:*' widget-style menu-select
 
-#  5. 通用别名
+#  4. 通用别名
 alias cz="chezmoi"
 alias cze="chezmoi edit"
 # 初始化 zoxide
