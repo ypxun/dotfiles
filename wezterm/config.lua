@@ -73,10 +73,22 @@ config.keys = {
 -- 5. Windows 专有设置 (如默认启动 WSL)
 -- --------------------------------------------------------------------
 if is_windows then
-    -- 强制指定 Windows 默认使用 PowerShell (pwsh)
-    -- 如果你安装了最新的 PowerShell 7，名字是 'pwsh.exe'
-    -- 如果是系统自带的蓝窗口 PowerShell，名字是 'powershell.exe'
-    config.default_prog = { 'pwsh.exe' }
+  config.default_prog = { 'wsl.exe', '-d', 'Arch', '--cd', '~' }
+  config.launch_menu = {
+        {
+            label = 'Arch Linux (Default)',
+            args = { 'wsl.exe', '-d', 'Arch', '--cd', '~' },
+        },
+        {
+            label = 'Debian WSL',
+            args = { 'wsl.exe', '-d', 'debian', '--cd', '~' },
+        },
+        {
+            label = 'PowerShell 7',
+            args = { 'pwsh.exe' },
+        }
+    }
+
 end
 
 return config
