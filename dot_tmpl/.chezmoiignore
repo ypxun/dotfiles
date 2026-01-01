@@ -3,6 +3,8 @@
 .zshrc
 .p10k.zsh
 .vimrc
+.config/tmux/
+.config/tmux/**
 # Windows 不运行 shell 脚本
 .chezmoiscripts/**
 {{ end }}

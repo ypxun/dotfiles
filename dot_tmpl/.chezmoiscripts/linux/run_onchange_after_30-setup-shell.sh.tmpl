@@ -15,3 +15,8 @@ if [[ "$SHELL" != "$(command -v zsh)" ]]; then
 fi
 
 echo "✨ 插件同步流程执行完毕！"
+
+echo "󰯓 [Tmux] 正在检查 oh-my-tmux 环境..."
+{{ template "ohmytmux.tmpl" . }}
+
+echo "✨ 完毕！"

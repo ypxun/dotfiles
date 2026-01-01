@@ -1,0 +1,19 @@
+{{- $tmuxConfigDir := joinPath .chezmoi.homeDir ".config/tmux" -}}
+{{- $ohMyTmuxDir := joinPath .chezmoi.homeDir ".local/share/tmux/oh-my-tmux" -}}
+
+# 1. 确保目录存在
+mkdir -p {{ $tmuxConfigDir | quote }}
+mkdir -p {{ dir $ohMyTmuxDir | quote }}
+
+# 2. 克隆框架（如果不存在）
+if [ ! -d {{ $ohMyTmuxDir | quote }} ]; then
+    echo "🚀 正在克隆 oh-my-tmux 框架..."
+    git clone --depth=1 https://github.com/gpakosz/.tmux.git {{ $ohMyTmuxDir | quote }}
+fi
+
+# 3. 创建引导软链接
+# 注意：Tmux 启动只读 ~/.config/tmux/tmux.conf
+if [ ! -L {{ joinPath $tmuxConfigDir "tmux.conf" | quote }} ]; then
+    echo "🔗 创建 tmux.conf 软链接..."
+    ln -sf {{ joinPath $ohMyTmuxDir ".tmux.conf" | quote }} {{ joinPath $tmuxConfigDir "tmux.conf" | quote }}
+fi

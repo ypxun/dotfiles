@@ -13,4 +13,9 @@ if [[ "$SHELL" != "$(command -v zsh)" ]]; then
     echo -e "\033[1;33m提示: 请手动执行 chsh -s \$(command -v zsh) 切换默认 Shell\033[0m"
 fi
 
-echo "✨ 插件同步执行完毕！"
+echo "✨ 插件同步流程执行完毕！"
+
+echo "󰯓 [Tmux] 正在检查 oh-my-tmux 环境..."
+{{ template "ohmytmux.tmpl" . }}
+
+echo "✨ 完毕！"
