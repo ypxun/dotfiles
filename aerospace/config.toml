@@ -224,7 +224,7 @@ PATH = '/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:${PA
 
     # 浏览器
     alt-b = [
-        'exec-and-forget open -a Firefox --args -new-window'
+        'exec-and-forget sh -c "sleep 0.1 && open -a Firefox --args -new-window"'
     ]
 
 # 'service' binding mode declaration.
