@@ -12,7 +12,6 @@ zsh
 bat
 fd
 eza
-unzip
 tmux
 
 # --- 生产力工具 (非无头设备) ---
