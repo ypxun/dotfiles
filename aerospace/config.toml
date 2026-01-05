@@ -219,7 +219,7 @@ PATH = '/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:${PA
 
     # 终端
     alt-t = [
-        'exec-and-forget wezterm start'
+        'exec-and-forget open -a WezTerm'
     ]
 
     # 浏览器
