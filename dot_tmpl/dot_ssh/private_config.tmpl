@@ -29,8 +29,8 @@ Host gitlab.company.com
 {{- end }}
 
 # --- 个人 VPS 列表 (仅个人机器 & 有头模式/WSL) ---
-{{- if and .personal (or (not .headless) .is_wsl) }}
-{{-   range .vps_items }}
+{{ if and .personal (or (not .headless) .is_wsl) }}
+{{   range .vps_items }}
 {{-     $vps := (bitwarden "item" .) -}}
 {{-     $fields := (bitwardenFields "item" .) -}}
 {{-     $alias := $fields.alias.value -}}
