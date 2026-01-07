@@ -47,13 +47,22 @@
 {{- end -}}
 
 {{- /* --- 3. 路径与变量计算 (L2 决策) --- */ -}}
-{{- $antidote_path := "$HOME/.antidote/antidote.zsh" -}}
+{{- /* Antidote: 仅限 Mac 和 Linux (含 WSL) */ -}}
+{{- $antidote_path := "" -}}
 {{- if eq $osID "darwin" -}}
     {{- if $is_arm64 -}}
         {{- $antidote_path = "/opt/homebrew/opt/antidote/share/antidote/antidote.zsh" -}}
     {{- else -}}
         {{- $antidote_path = "/usr/local/opt/antidote/share/antidote/antidote.zsh" -}}
     {{- end -}}
+{{- else if hasPrefix "linux" $osID -}}
+    {{- $antidote_path = "$HOME/.antidote/antidote.zsh" -}}
+{{- end -}}
+
+{{- /* Scoop: 仅限 WSL 环境 */ -}}
+{{- $scoop_path := "" -}}
+{{- if $is_wsl -}}
+    {{- $scoop_path = "/mnt/f/scoop/ypk/shims" -}}
 {{- end -}}
 
 {{- $email := promptStringOnce . "email" "Git Email Address" -}}
@@ -78,7 +87,7 @@
 
     # 路径 (Source of Truth)
     path_antidote = {{ $antidote_path | quote }}
-    path_scoop_shims = "/mnt/f/scoop/ypk/shims"
+    path_scoop_shims = {{ $scoop_path | quote }}
 
     # VPS 列表 (仅个人机器需要连接)
     vps_items = ["vps_kr_oracle", "vps_jp_claw", "vps_sg_mikyhost", "vps_hp_g1"] 
