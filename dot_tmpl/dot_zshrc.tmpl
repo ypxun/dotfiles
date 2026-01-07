@@ -99,3 +99,6 @@ fi
 # 注意：这里保留 $(chezmoi source-path) 动态执行，是为了防止你移动了仓库目录导致硬编码路径失效
 alias bup='brew bundle dump --force --file="$(chezmoi source-path)/../homebrew/Brewfile" && chezmoi apply'
 {{- end }}
+
+# --- 5. 加载 P10K 界面配置 ---
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
