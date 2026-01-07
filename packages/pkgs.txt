@@ -1,5 +1,5 @@
 # --- 核心基础工具 ---
-gpg
+gnupg
 zoxide
 fzf
 ripgrep
