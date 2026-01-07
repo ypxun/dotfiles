@@ -1,69 +1,87 @@
-{{- /* 1. 环境初始化 */ -}}
+{{- /* --- 1. 基础环境探测 --- */ -}}
+{{- $osID := .chezmoi.os -}}
+{{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
+    {{- $osID = .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{- /* 检测 WSL & 架构 */ -}}
+{{- $is_wsl := or (env "WSL_DISTRO_NAME") (env "WSL_INTEROP") | not | not -}}
+{{- $is_arm64 := eq .chezmoi.arch "arm64" -}}
+
+{{- /* --- 2. 身份定义 (L1 决策) --- */ -}}
 {{- $ephemeral := false -}}
 {{- $headless := false -}}
 {{- $personal := false -}}
 {{- $work := false -}}
-{{- $is_wsl := false -}}
 
-{{- /* 2. 操作系统与主机名探测 */ -}}
-{{- $osID := .chezmoi.os -}}
-{{- if hasKey .chezmoi.osRelease "id" -}}
-    {{- $osID = .chezmoi.osRelease.id -}} {{/* 直接用 debian, ubuntu, arch 等，不加 linux- 前缀 */}}
-{{- end -}}
-
-{{- /* 精准探测 WSL2 - 核心新增 */ -}}
-{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
-    {{- $is_wsl = true -}}
-{{- end -}}
-
-{{- $hostname := .chezmoi.hostname -}}
-{{- if eq .chezmoi.os "darwin" -}}
-    {{- $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
-{{- end -}}
-
-{{- /* 3. 自动识别临时环境 (Codespaces, Docker, 等) */ -}}
+{{- /* 临时环境检测 */ -}}
 {{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "ubuntu" "vscode") -}}
     {{- $ephemeral = true -}}
     {{- $headless = true -}}
-{{- end -}}
-
-{{- /* 4. 身份核心逻辑：基于主机名的全自动识别 */ -}}
-{{- if not $ephemeral -}}
-    {{- if eq $hostname "pkmbp" "pk-pc" -}}
+{{- else -}}
+    {{- /* 实体机：优先使用 Hostname */ -}}
+    {{- if eq .chezmoi.hostname "pkmbp" "pk-pc" -}}
         {{- $personal = true -}}
-        {{- if $is_wsl -}}
-            {{- $headless = true -}} {{/* WSL2 虽为无头，但通过 is_wsl 标识区分 */}}
-        {{- else -}}
-            {{- $headless = false -}}
-        {{- end -}}
-    {{- else if eq $hostname "debian" -}}{{/* 这里填你 VPS 的主机名 */}}
-        {{- $personal = true -}}
+    {{- else if eq .chezmoi.hostname "work_pkmbp" "work_pkpc" -}}
+        {{- /* 在这里填入你公司电脑的主机名 */ -}}
+        {{- $work = true -}}
+    {{- else if eq .chezmoi.hostname "debian" -}}
         {{- $headless = true -}}
+        {{- $personal = true -}}
     {{- else if stdinIsATTY -}}
-        {{- $personal = promptBoolOnce . "personal" "是否为个人设备?" -}}
-        {{- $headless = promptBoolOnce . "headless" "是否为无头(服务器)模式?" -}}
+        {{- /* 交互式询问并缓存结果 */ -}}
+        {{- $personal = promptBoolOnce . "personal" "Is this a personal machine?" -}}
+        {{- if not $personal -}}
+            {{- $work = promptBoolOnce . "work" "Is this a work machine?" -}}
+        {{- end -}}
+        {{- $headless = promptBoolOnce . "headless" "Is this a headless (no GUI) machine?" -}}
     {{- else -}}
+        {{- $headless = true -}}
         {{- $ephemeral = true -}}
     {{- end -}}
 {{- end -}}
 
-{{- /* 5. 变量获取 */ -}}
+{{- /* WSL2 修正：视为有头设备 */ -}}
+{{- if $is_wsl -}}
+    {{- $headless = false -}}
+{{- end -}}
+
+{{- /* --- 3. 路径与变量计算 (L2 决策) --- */ -}}
+{{- $antidote_path := "$HOME/.antidote/antidote.zsh" -}}
+{{- if eq $osID "darwin" -}}
+    {{- if $is_arm64 -}}
+        {{- $antidote_path = "/opt/homebrew/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- else -}}
+        {{- $antidote_path = "/usr/local/opt/antidote/share/antidote/antidote.zsh" -}}
+    {{- end -}}
+{{- end -}}
+
 {{- $email := promptStringOnce . "email" "Git Email Address" -}}
-{{- $name := promptStringOnce . "name" "Git User Name" -}}
+{{- $name := promptStringOnce . "name" "Git Public Name" -}}
 
 [data]
-    email = {{ $email | quote }}
-    name = {{ $name | quote }}
+    # 身份开关
+    ephemeral = {{ $ephemeral }}
+    headless = {{ $headless }}
     personal = {{ $personal }}
     work = {{ $work }}
-    headless = {{ $headless }}
     is_wsl = {{ $is_wsl }}
-    ephemeral = {{ $ephemeral }}
+    
+    # 属性缓存
     osid = {{ $osID | quote }}
-    hostname = {{ $hostname | quote }}
+    arch = {{ .chezmoi.arch | quote }}
+    is_arm64 = {{ $is_arm64 }}
+    
+    # 用户信息
+    email = {{ $email | quote }}
+    name = {{ $name | quote }}
+
+    # 路径 (Source of Truth)
+    path_antidote = {{ $antidote_path | quote }}
+    path_scoop_shims = "/mnt/f/scoop/ypk/shims"
+
+    # VPS 列表 (仅个人机器需要连接)
     vps_items = ["vps_kr_oracle", "vps_jp_claw", "vps_sg_mikyhost", "vps_hp_g1"] 
-    scoop_shims = "/mnt/f/scoop/ypk/shims"
-# --- 以下为你原有的全局配置 ---
 
 ignorePatterns = [
   "*.secret", "*.key", "*.pem", "*.token",
@@ -79,14 +97,14 @@ ignorePatterns = [
 
 [diff]
     command = "delta"
+    pager = "delta"
 
 [git]
     autoCommit = true
     autoPush = false
 
 [cd]
-    command = {{ if eq .chezmoi.os "windows" }}"pwsh"{{ else }}"zsh"{{ end }}
+    command = {{ if eq $osID "windows" }}"pwsh"{{ else }}"zsh"{{ end }}
 
 [apply]
     refreshPeriod = "1m"
-    

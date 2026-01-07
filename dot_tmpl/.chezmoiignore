@@ -33,9 +33,9 @@
 {{- end }}
 {{- end }}
 
-{{- /* 4. 隐私隔离墙：核心！ */ -}}
-# 如果不是个人设备，或者在临时环境（如 codespaces）中，不要同步私钥
-{{- if or (not .personal) .ephemeral }}
+# --- 4. 隐私隔离墙 (核心优化) ---
+# 临时环境：全屏蔽
+{{- if .ephemeral }}
 .ssh/
 .ssh/**
 .gnupg/
@@ -43,12 +43,34 @@
 .zshrc.secret
 {{ end }}
 
-{{- /* 5. 脚本排除 */ -}}
-# 只有在 Linux 下才跑 linux 文件夹里的脚本
-{{- if ne .chezmoi.os "linux" }}
+# 工作环境：只屏蔽个人私钥和个人VPS配置
+{{- if .work }}
+.ssh/id_rsa
+.ssh/id_rsa.pub
+.ssh/github_ypxun
+.ssh/key_vps_root
+.ssh/key_vps_user
+.gnupg/
+.gnupg/**
+.zshrc.secret
+{{ end }}
+
+# 非个人且非工作（未知环境）：全屏蔽
+{{- if and (not .personal) (not .work) }}
+.ssh/
+.ssh/**
+.gnupg/
+.gnupg/**
+.zshrc.secret
+{{ end }}
+
+# --- 5. 脚本排除 ---
+# 如果 osid 不以 "linux" 开头 (例如 windows, darwin)，则排除 linux 脚本
+{{- if not (hasPrefix "linux" .osid) }}
 .chezmoiscripts/linux/**
 {{ end }}
-# 只有在 macOS 下才跑 darwin 文件夹里的脚本
-{{- if ne .chezmoi.os "darwin" }}
+
+# 如果 osid 不是 "darwin"，则排除 darwin 脚本
+{{- if ne .osid "darwin" }}
 .chezmoiscripts/darwin/**
 {{ end }}

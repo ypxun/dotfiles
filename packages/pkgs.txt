@@ -20,5 +20,4 @@ unzip
 {{- if not .headless }}
 nodejs
 npm
-uv
 {{- end }}

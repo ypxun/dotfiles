@@ -2,51 +2,52 @@
 # 监控清单变化: {{ include (joinPath .chezmoi.workingTree "packages/pkgs.txt") | sha256sum }}
 set -eufo pipefail
 
-{{ $sudo_val := "sudo " -}}
+{{ $sudo := "sudo " -}}
 {{- if eq .chezmoi.username "root" -}}
-    {{- $sudo_val = "" -}}
+    {{- $sudo = "" -}}
 {{- end -}}
 
-# 将 Go 变量的值赋给 Shell 变量 sudo
-sudo={{ $sudo_val | quote }}
-OS_ID={{ .osid | quote }}
-
-# 1. 提取并翻译包清单
+# 1. 读取包列表 (支持 pkgs.txt 内部的模板逻辑)
 {{- $raw_pkgs := (includeTemplate (joinPath .chezmoi.workingTree "packages/pkgs.txt") . | splitList "\n") -}}
-{{- $install_list := list -}}
+{{- $packages := list -}}
 
+# 2. 差异化映射
+# 空字符串 "" 代表由后续脚本(20)安装，或不安装
+{{- $debian_map := dict 
+    "fd" "fd-find" 
+    "eza" ""          
+    "micromamba" ""
+    "uv" ""
+-}}
+
+{{- $arch_map := dict 
+    "micromamba" "" 
+    "uv" ""
+-}}
+
+# 3. 列表构建
 {{- range $raw_pkgs -}}
-    {{- $p := . | trim -}}
-    {{- if and $p (not (hasPrefix "#" $p)) -}}
-        {{- $target := $p -}}
+    {{- $pkg := . | trim -}}
+    {{- if and $pkg (not (hasPrefix "#" $pkg)) -}}
+        {{- $target_pkg := $pkg -}}
         
-        {{- /* 针对 Debian、Ubuntu 的特殊名翻译 */ -}}
-        {{- if eq $.osid "debian" "ubuntu" -}}
-            {{- if eq $p "fd" }}{{ $target = "fd-find" }}{{ end -}}
-            {{- if or (eq $p "eza") (eq $p "micromamba") (eq $p "uv") -}}
-                {{- $target = "" }}
-            {{- end -}}
-        {{- end -}}
-        
-        {{- /* 针对 Arch 的名翻译 (Arch 源里 micromamba 通常叫 micromamba-bin 等，这里暂定原名或空) */ -}}
-        {{- if eq $.osid "arch" -}}
-            {{- if eq $p "micromamba" }}{{ end -}}
+        {{- /* 根据 OSID 进行名称转换 */ -}}
+        {{- if eq .osid "linux-debian" "linux-ubuntu" -}}
+            {{- if hasKey $debian_map $pkg }}{{ $target_pkg = get $debian_map $pkg }}{{ end -}}
+        {{- else if eq .osid "linux-arch" -}}
+            {{- if hasKey $arch_map $pkg }}{{ $target_pkg = get $arch_map $pkg }}{{ end -}}
         {{- end -}}
 
-        {{- if $target }}{{ $install_list = append $install_list $target }}{{ end -}}
+        {{- if ne $target_pkg "" -}}
+            {{- $packages = mustAppend $packages $target_pkg -}}
+        {{- end -}}
     {{- end -}}
 {{- end -}}
 
-# 2. 执行安装
-case "$OS_ID" in
-    "debian"|"ubuntu")
-        $sudo apt-get update
-        INSTALL_CMD="$sudo apt-get install -y"
-        ;;
-    "arch")
-        INSTALL_CMD="$sudo pacman -S --needed --noconfirm"
-        ;;
-esac
+echo "📦 [Install] 同步系统软件包 ({{ .osid }})..."
 
-echo "📦 [1/3] 正在同步 $OS_ID 系统软件包..."
-$INSTALL_CMD {{ $install_list | uniq | sortAlpha | join " " }}
+{{ if eq .osid "linux-debian" "linux-ubuntu" -}}
+    {{ $sudo }}apt update && {{ $sudo }}apt install -y {{ $packages | join " " }}
+{{ else if eq .osid "linux-arch" -}}
+    {{ $sudo }}pacman -S --needed --noconfirm {{ $packages | join " " }}
+{{ end -}}

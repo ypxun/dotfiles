@@ -3,52 +3,34 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# --- 2. 基础设施探测 ---
-# [环境变量]
+# --- 2. 基础设施探测与注入 ---
+
+# [本地 Bin 目录]
 if [[ -d "$HOME/.local/bin" ]]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# [Homebrew 初始化：仅限 macOS 必须通过绝对路径启动]
-{{ if eq .chezmoi.os "darwin" -}}
-{{- $brew := "/usr/local/bin/brew" }}{{ if eq .chezmoi.arch "arm64" }}{{ $brew = "/opt/homebrew/bin/brew" }}{{ end -}}
-if [[ -f {{ $brew | quote }} ]]; then
-    eval "$({{ $brew }} shellenv)"
-fi
-{{- end }}
-
-# [Antidote 路径校准：采用官方推荐的 opt 软链接路径]
-{{- $antidotePath := "" -}}
-{{- if eq .chezmoi.os "darwin" -}}
-    {{- if eq .chezmoi.arch "arm64" -}}
-        {{- $antidotePath = "/opt/homebrew/opt/antidote/share/antidote/antidote.zsh" -}}
-    {{- else -}}
-        {{- $antidotePath = "/usr/local/opt/antidote/share/antidote/antidote.zsh" -}}
+# [Homebrew 初始化 (macOS)]
+{{- if eq .osid "darwin" -}}
+    {{- $brew_bin := "/usr/local/bin/brew" -}}
+    {{- if .is_arm64 -}}
+        {{- $brew_bin = "/opt/homebrew/bin/brew" -}}
     {{- end -}}
-{{- else -}}
-    {{- $antidotePath = "$HOME/.antidote/antidote.zsh" -}}
-{{- end -}}
-
-# [Micromamba 路径探测：完全去中心化]
-{{- $mambaPath := "" -}}
-{{- if lookPath "micromamba" -}}
-    {{- $mambaPath = lookPath "micromamba" -}}
-{{- else if lookPath "mamba" -}}
-    {{- $mambaPath = lookPath "mamba" -}}
-{{- end -}}
-
-# 只要在 PATH 中找到了，就注入变量；找不到，主体逻辑中的 if [[ -f "$MAMBA_EXE" ]] 自然会跳过
-{{ if $mambaPath -}}
-export MAMBA_EXE={{ $mambaPath | quote }}
+    
+    {{- if stat $brew_bin }}
+# 注入 Homebrew 优化变量
+#export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_AUTO_UPDATE_SECS=604800
+# 初始化 Homebrew Shell 环境
+eval "$({{ $brew_bin }} shellenv)"
+    {{- end }}
 {{- end }}
 
-# [FZF 预设]
-export FZF_DEFAULT_COMMAND='fd --type f'
-
-# --- 3. Antidote 独立加载 (在真身之前) ---
-if [[ -f {{ $antidotePath | quote }} ]]; then
-    source {{ $antidotePath | quote }}
-    # 优先使用脚本生成的静态缓存，如果没生成则动态加载
+# [Antidote 插件管理器]
+# 路径由 .chezmoi.toml 统一计算
+if [[ -f {{ .path_antidote | quote }} ]]; then
+    source {{ .path_antidote | quote }}
+    # 优先加载静态缓存，提升启动速度
     if [[ -f ~/.zsh_plugins.zsh ]]; then
         source ~/.zsh_plugins.zsh
     else
@@ -56,38 +38,64 @@ if [[ -f {{ $antidotePath | quote }} ]]; then
     fi
 fi
 
-# --- 5. 跨平台特殊处理 (在此处处理动态逻辑) ---
-{{ if .is_wsl -}}
-# 识别到是 pk-pc 的 WSL2 环境，注入 Windows 侧 Scoop 路径
-alias open=explorer.exe
-if [ -d {{ .scoop_shims | quote }} ]; then
-    export PATH="$PATH:{{ .scoop_shims }}"
-fi
-{{- else if (env "WSL_DISTRO_NAME") -}}
-alias open=explorer.exe
+# [Micromamba]
+# 使用 lookPath 在生成时检测，减少 Shell 启动时的 IO
+{{- $mamba_bin := lookPath "micromamba" | default (lookPath "mamba") -}}
+{{- if $mamba_bin }}
+export MAMBA_EXE={{ $mamba_bin | quote }}
+export MAMBA_ROOT_PREFIX="$HOME/mamba"
+eval "$({{ $mamba_bin | quote }} shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)"
+
+# Mamba 环境快速切换函数
+mact() {
+    local env
+    env=$({{ $mamba_bin | quote }} env list | grep -v '^#' | grep -v '^$' | fzf --height 40% --reverse --header "Switch Env:" | awk '{print $1}')
+    [ -n "$env" ] && mamba activate "$env"
+}
 {{- end }}
 
-# --- 5. 引入你的 zshrc 主体 (真身) ---
+# [Zoxide]
+{{- if lookPath "zoxide" }}
+eval "$(zoxide init zsh)"
+alias cd="z"
+{{- end }}
+
+# --- 3. 加载用户主体配置 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
-{{ "" }}
 
-# --- 6. 最后的命令抹平补丁 (在主体之后，确保拥有最终解释权) ---
-{{ $bat := "" -}}
-{{- if lookPath "bat" -}}
-    {{- $bat = "bat" -}}
-{{- else if lookPath "batcat" -}}
-    {{- $bat = "batcat" -}}
-{{- end -}}
+# --- 4. 跨平台命令抹平 (放在最后，确保覆盖) ---
+export FZF_DEFAULT_COMMAND='fd --type f'
 
-{{- if $bat }}
-alias bat={{ $bat | quote }}
-alias cat='{{ $bat }} -P'
+{{- if lookPath "bat" }}
+alias bat="bat"
+alias cat="bat -P"
+{{- else if lookPath "batcat" }}
+# Debian/Ubuntu 兼容
+alias bat="batcat"
+alias cat="batcat -P"
 {{- end }}
 
-{{ if lookPath "fdfind" -}}
-alias fd='fdfind'
+{{- if lookPath "fdfind" }}
+# Debian/Ubuntu 兼容
+alias fd="fdfind"
 {{- end }}
 
-{{- if lookPath "eza" -}}
-alias ls='eza --icons=always'
+{{- if lookPath "eza" }}
+alias ls="eza --icons=always"
+{{- end }}
+
+# [WSL 专属]
+{{- if .is_wsl }}
+alias open="explorer.exe"
+# 注入 Windows 侧 Scoop 路径
+if [ -d {{ .path_scoop_shims | quote }} ]; then
+    export PATH="$PATH:{{ .path_scoop_shims }}"
+fi
+{{- end }}
+
+# Mac 专用备份命令
+{{- if eq .osid "darwin" }}
+# 备份 Brewfile 到 Dotfiles 仓库并应用变更
+# 注意：这里保留 $(chezmoi source-path) 动态执行，是为了防止你移动了仓库目录导致硬编码路径失效
+alias bup='brew bundle dump --force --file="$(chezmoi source-path)/../homebrew/Brewfile" && chezmoi apply'
 {{- end }}

@@ -1,15 +1,11 @@
-{{/* 1. 计算换行符逻辑 */}}
-{{- $crlf := "autocrlf = input" -}}
-{{- if eq .chezmoi.os "windows" -}}
-    {{- $crlf = "autocrlf = true" -}}
-{{- end -}}
+# 1. 引入基础通用配置 (真身)
+{{ include (joinPath .chezmoi.workingTree "git/gitconfig") }}
 
-{{/* 2. 读取真身内容 */}}
-{{- $raw_config := include (joinPath .chezmoi.workingTree "git/gitconfig") -}}
+# 2. 动态追加个性化配置
+[user]
+    name = {{ .name | quote }}
+    email = {{ .email | quote }}
 
-{{/* 3. 执行链式替换并输出 */}}
-{{- $raw_config 
-    | replace "@GIT_NAME@" .name 
-    | replace "@GIT_EMAIL@" .email 
-    | replace "@GIT_CRLF@" $crlf 
--}}
+[core]
+    # Windows 自动转换 CRLF，Linux 保持原样
+    autocrlf = {{ if eq .osid "windows" }}true{{ else }}input{{ end }}

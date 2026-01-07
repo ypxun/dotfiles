@@ -1,21 +1,40 @@
-{{- if and .personal (not .ephemeral) }}
+{{- /* 核心门卫：只有“个人”或“工作”设备才生成此文件 */ -}}
+{{- if or .personal .work -}}
+
+# --- 基础通用配置 ---
 Host *
     ServerAliveInterval 10
     ServerAliveCountMax 60
     IdentitiesOnly yes
 
+# --- 个人 GitHub (仅个人机器) ---
+{{- if .personal }}
 Host github.com gist.github.com
     HostName %h
     User git
     IdentityFile ~/.ssh/github_ypxun
+{{- end }}
 
-# === 动态加载 VPS 列表 ===
-{{ if or (not .headless) .is_wsl -}}
-{{ range .vps_items -}}
-{{ $vps := (bitwarden "item" .) -}}
-{{ $fields := (bitwardenFields "item" .) -}}
-{{ $alias := $fields.alias.value -}}
-{{ $ip := (index $vps.login.uris 0).uri }}
+# --- 工作环境配置 (仅工作机器) ---
+{{- if .work }}
+# 假设公司内网/GitLab
+Host gitlab.company.com
+    User git
+    # 优化：先检测密钥是否存在，避免 SSH 报错
+    {{- if stat (joinPath .chezmoi.homeDir ".ssh/id_rsa_work") }}
+    IdentityFile ~/.ssh/id_rsa_work
+    {{- else }}
+    # ⚠️  请运行 ssh-keygen -t ed25519 -f ~/.ssh/id_rsa_work 生成工作密钥
+    {{- end }}
+{{- end }}
+
+# --- 个人 VPS 列表 (仅个人机器 & 有头模式/WSL) ---
+{{- if and .personal (or (not .headless) .is_wsl) -}}
+{{-   range .vps_items -}}
+{{-     $vps := (bitwarden "item" .) -}}
+{{-     $fields := (bitwardenFields "item" .) -}}
+{{-     $alias := $fields.alias.value -}}
+{{-     $ip := (index $vps.login.uris 0).uri -}}
 Host {{ $alias }}
     HostName {{ $ip }}
     Port {{ $fields.port.value }}
@@ -28,6 +47,7 @@ Host {{ $alias }}_root
     User {{ $fields.root_user.value }}
     IdentityFile ~/.ssh/key_vps_root
 
-{{ end -}}
-{{ end -}}
-{{ end -}}
+{{    end -}}
+{{- end -}}
+
+{{- end -}}
