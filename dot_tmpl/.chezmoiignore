@@ -1,5 +1,5 @@
 {{- /* 1. Windows 特有排除 */ -}}
-{{- if eq .chezmoi.os "windows" }}
+{{- if eq .osid "windows" }}
 .zshrc
 .p10k.zsh
 .vimrc
@@ -17,7 +17,7 @@
 {{ end }}
 
 {{- /* 2. macOS 独占软件排除 (AeroSpace, Hammerspoon) */ -}}
-{{- if ne .chezmoi.os "darwin" }}
+{{- if ne .osid "darwin" }}
 .aerospace.toml
 .hammerspoon/
 .hammerspoon/**

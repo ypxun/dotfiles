@@ -2,7 +2,7 @@
 {{- $antidotePath := .path_antidote -}}
 
 {{- /* 2. Linux 自动安装 (macOS 通常由 Brew 安装) */ -}}
-{{ if eq .osid "linux" }}
+{{- if (hasPrefix "linux" .osid) }}
 # 确保安装目录存在
 if [ ! -f {{ $antidotePath | quote }} ]; then
     echo "🚀 [Linux] 正在克隆 Antidote..."
