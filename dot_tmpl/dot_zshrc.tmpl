@@ -68,11 +68,11 @@ export FZF_DEFAULT_COMMAND='fd --type f'
 
 {{- if lookPath "bat" }}
 alias bat="bat"
-alias cat="bat -P"
+alias cat="bat -P --theme='ansi'"
 {{- else if lookPath "batcat" }}
 # Debian/Ubuntu 兼容
 alias bat="batcat"
-alias cat="batcat -P"
+alias cat="batcat -P --theme='ansi'"
 {{- end }}
 
 {{- if lookPath "fdfind" }}
