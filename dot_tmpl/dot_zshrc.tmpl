@@ -12,31 +12,24 @@ fi
 
 # [Homebrew 初始化 (macOS)]
 {{- if eq .osid "darwin" -}}
-    {{- $brew_bin := "/usr/local/bin/brew" -}}
-    {{- if .is_arm64 -}}
-        {{- $brew_bin = "/opt/homebrew/bin/brew" -}}
-    {{- end -}}
-    
-    {{- if stat $brew_bin }}
+    {{- if stat .path_homebrew_bin }}
 # 注入 Homebrew 优化变量
-#export HOMEBREW_NO_ENV_HINTS=1
 export HOMEBREW_AUTO_UPDATE_SECS=604800
 # 初始化 Homebrew Shell 环境
-eval "$({{ $brew_bin }} shellenv)"
+eval "$({{ .path_homebrew_bin }} shellenv)"
     {{- end }}
 {{- end }}
 
 # [Antidote 插件管理器]
-# 路径由 .chezmoi.toml 统一计算
-if [[ -f {{ .path_antidote | quote }} ]]; then
-    source {{ .path_antidote | quote }}
-    # 优先加载静态缓存，提升启动速度
-    if [[ -f ~/.zsh_plugins.zsh ]]; then
-        source ~/.zsh_plugins.zsh
-    else
-        antidote load ~/.zsh_plugins.txt ~/.zsh_plugins.zsh
-    fi
+{{- if .path_antidote | stat }}
+source {{ .path_antidote | quote }}
+# 优先加载静态缓存，提升启动速度
+if [[ -f ~/.zsh_plugins.zsh ]]; then
+    source ~/.zsh_plugins.zsh
+else
+    antidote load ~/.zsh_plugins.txt ~/.zsh_plugins.zsh
 fi
+{{- end }}
 
 # [Micromamba]
 # 使用 lookPath 在生成时检测，减少 Shell 启动时的 IO
@@ -66,13 +59,21 @@ alias cd="z"
 # --- 4. 跨平台命令抹平 (放在最后，确保覆盖) ---
 export FZF_DEFAULT_COMMAND='fd --type f'
 
-{{- if lookPath "bat" }}
-alias bat="bat"
-alias cat="bat -P --theme='ansi'"
-{{- else if lookPath "batcat" }}
-# Debian/Ubuntu 兼容
-alias bat="batcat"
-alias cat="batcat -P --theme='ansi'"
+{{- /* 1. 探测 'bat' 或 'batcat' 的可用命令名 */ -}}
+{{- $bat_cmd := "" -}}
+{{- if lookPath "bat" -}}
+    {{- $bat_cmd = "bat" -}}
+{{- else if lookPath "batcat" -}}
+    {{- $bat_cmd = "batcat" -}}
+{{- end -}}
+
+{{- /* 2. 如果找到了命令，则统一创建别名 */ -}}
+{{- if $bat_cmd }}
+alias cat="{{ $bat_cmd }} -P --theme='ansi'"
+    {{- if ne $bat_cmd "bat" }}
+# 为 Debian/Ubuntu 等系统创建兼容性别名
+alias bat="{{ $bat_cmd }}"
+    {{- end }}
 {{- end }}
 
 {{- if lookPath "fdfind" }}
@@ -95,9 +96,9 @@ fi
 
 # Mac 专用备份命令
 {{- if eq .osid "darwin" }}
+    {{- $brewfile_path := joinPath .chezmoi.workingTree "homebrew/Brewfile" -}}
 # 备份 Brewfile 到 Dotfiles 仓库并应用变更
-# 注意：这里保留 $(chezmoi source-path) 动态执行，是为了防止你移动了仓库目录导致硬编码路径失效
-alias bup='brew bundle dump --force --file="$(chezmoi source-path)/../homebrew/Brewfile" && chezmoi apply'
+alias bup='brew bundle dump --force --file={{ $brewfile_path | quote }} && chezmoi apply'
 {{- end }}
 
 # --- 5. 加载 P10K 界面配置 ---

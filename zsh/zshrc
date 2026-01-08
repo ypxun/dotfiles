@@ -12,4 +12,3 @@ zstyle ':autocomplete:*' widget-style menu-select
 # --- 4. 通用别名 ---
 alias cz="chezmoi"
 alias cze="chezmoi edit"
-alias cza="chezmoi apply"

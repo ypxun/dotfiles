@@ -47,13 +47,15 @@
 {{- end -}}
 
 {{- /* --- 3. 路径与变量计算 (L2 决策) --- */ -}}
-{{- /* Antidote: 仅限 Mac 和 Linux (含 WSL) */ -}}
 {{- $antidote_path := "" -}}
+{{- $homebrew_bin := "" -}}
 {{- if eq $osID "darwin" -}}
     {{- if $is_arm64 -}}
         {{- $antidote_path = "/opt/homebrew/opt/antidote/share/antidote/antidote.zsh" -}}
+        {{- $homebrew_bin = "/opt/homebrew/bin/brew" -}}
     {{- else -}}
         {{- $antidote_path = "/usr/local/opt/antidote/share/antidote/antidote.zsh" -}}
+        {{- $homebrew_bin = "/usr/local/bin/brew" -}}
     {{- end -}}
 {{- else if hasPrefix "linux" $osID -}}
     {{- $antidote_path = "$HOME/.antidote/antidote.zsh" -}}
@@ -87,6 +89,7 @@
 
     # 路径 (Source of Truth)
     path_antidote = {{ $antidote_path | quote }}
+    path_homebrew_bin = {{ $homebrew_bin | quote }}
     path_scoop_shims = {{ $scoop_path | quote }}
 
     # VPS 列表 (仅个人机器需要连接)
