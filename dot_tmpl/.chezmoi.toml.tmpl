@@ -58,7 +58,7 @@
         {{- $homebrew_bin = "/usr/local/bin/brew" -}}
     {{- end -}}
 {{- else if hasPrefix "linux" $osID -}}
-    {{- $antidote_path = "$HOME/.antidote/antidote.zsh" -}}
+    {{- $antidote_path = (joinPath .chezmoi.homeDir ".antidote/antidote.zsh") -}}
 {{- end -}}
 
 {{- /* Scoop: 仅限 WSL 环境 */ -}}
