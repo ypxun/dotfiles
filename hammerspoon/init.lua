@@ -14,7 +14,7 @@ IM_Specialist.config = {
     default_im = "im.rime.inputmethod.Squirrel.Hans",
 
     -- 事件响应延迟，防止与系统动画冲突，提高稳定性
-    delay = 0.1,
+    delay = 0.2,
 
     -- 黑名单：这些应用的输入法将永远不会被 Hammerspoon 触碰
     blacklist = {
