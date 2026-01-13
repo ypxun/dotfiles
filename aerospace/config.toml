@@ -244,9 +244,9 @@ PATH = '/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:${PA
     alt-shift-l = ['join-with right', 'mode main']
 
 # 访达
-# [[on-window-detected]]
-#     if.app-id = 'com.apple.finder'
-#     run = ['layout floating']
+[[on-window-detected]]
+    if.app-id = 'com.apple.finder'
+    run = ['layout floating']
 
 # AppStore
 [[on-window-detected]]

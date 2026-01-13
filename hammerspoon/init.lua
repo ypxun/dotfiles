@@ -11,7 +11,7 @@ IM_Specialist.config = {
     vscode_bundle_id = "com.microsoft.VSCode",
 
     -- 除 VSCode 外，所有应用默认使用的输入法 (微信输入法)
-    default_im = "com.tencent.inputmethod.wetype.pinyin",
+    default_im = "im.rime.inputmethod.Squirrel.Hans",
 
     -- 事件响应延迟，防止与系统动画冲突，提高稳定性
     delay = 0.1,
