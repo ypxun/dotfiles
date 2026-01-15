@@ -68,6 +68,7 @@
 # 如果 osid 不以 "linux" 开头 (例如 windows, darwin)，则排除 linux 脚本
 {{- if not (hasPrefix "linux" .osid) }}
 .chezmoiscripts/linux/**
+pbcopy.py
 {{ end }}
 
 # 如果 osid 不是 "darwin"，则排除 darwin 脚本
