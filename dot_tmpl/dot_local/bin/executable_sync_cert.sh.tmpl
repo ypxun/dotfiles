@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# --- 1. 从 Bitwarden 获取配置 ---
+{{- $bw := (bitwardenFields "vps_cert_puller") -}}
+{{- $remote := $bw.remote_name.value -}}
+
+# --- 2. 注入 Rclone 认证环境变量 (直接引用 BW 字段) ---
+export RCLONE_CONFIG_{{ $remote }}_TYPE=s3
+export RCLONE_CONFIG_{{ $remote }}_PROVIDER=Other
+export RCLONE_CONFIG_{{ $remote }}_ACCESS_KEY_ID="{{ $bw.access_key.value }}"
+export RCLONE_CONFIG_{{ $remote }}_SECRET_ACCESS_KEY="{{ $bw.secret_key.value }}"
+export RCLONE_CONFIG_{{ $remote }}_ENDPOINT="{{ $bw.s3_endpoint.value }}"
+export RCLONE_CONFIG_{{ $remote }}_PATH_STYLE_ACCESS=true
+
+# --- 3. 注入脚本逻辑需要的路径变量 ---
+export REMOTE_NAME="{{ $remote }}"
+export BUCKET="{{ $bw.s3_bucket.value }}"
+export SUB_DIR="{{ $bw.s3_subdir.value }}"
+export LOCAL_DIR="{{ $bw.cert_local_dir.value }}"
+
+# --- 4. 索引外部逻辑脚本 ---
+{{ include (joinPath .chezmoi.workingTree "cert/sync_cert.sh") }}

@@ -14,6 +14,7 @@
 # 这样 Mac、公司电脑、容器环境都不会产生这个文件
 {{- if not (and .personal .headless (not .ephemeral)) }}
 .ssh/authorized_keys
+.local/bin/sync_cert.sh
 {{ end }}
 
 {{- /* 2. macOS 独占软件排除 (AeroSpace, Hammerspoon) */ -}}
