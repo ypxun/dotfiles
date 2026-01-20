@@ -9,12 +9,17 @@ KEY_FILE="key.pem"
 mkdir -p "$LOCAL_DIR"
 mkdir -p "$TMP_DIR"
 
-# 同步文件 (rclone 会自动识别环境变量中的配置)
-rclone copy "$REMOTE_NAME:$BUCKET/$SUB_DIR/$CERT_FILE" "$TMP_DIR/"
-rclone copy "$REMOTE_NAME:$BUCKET/$SUB_DIR/$KEY_FILE" "$TMP_DIR/"
+# 同步文件 (rclone 会自动识别环境变量中的配置)，并捕获错误
+if ! rclone copy "$REMOTE_NAME:$BUCKET/$SUB_DIR/$CERT_FILE" "$TMP_DIR/" || \
+   ! rclone copy "$REMOTE_NAME:$BUCKET/$SUB_DIR/$KEY_FILE" "$TMP_DIR/"; then
+    logger -t sync_cert "CRITICAL: rclone failed to copy certificates. Check network or S3 credentials."
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
 
-# 检查文件是否下载成功
-if [ ! -f "$TMP_DIR/$CERT_FILE" ]; then
+# 检查文件是否下载成功（冗余检查，以防万一）
+if [ ! -f "$TMP_DIR/$CERT_FILE" ] || [ ! -f "$TMP_DIR/$KEY_FILE" ]; then
+    logger -t sync_cert "ERROR: Downloaded files missing in $TMP_DIR."
     rm -rf "$TMP_DIR"
     exit 1
 fi
