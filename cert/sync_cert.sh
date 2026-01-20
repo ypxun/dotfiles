@@ -29,8 +29,17 @@ if [ ! -f "$LOCAL_DIR/$CERT_FILE" ] || [ "$(md5sum "$TMP_DIR/$CERT_FILE" | awk '
     chmod 644 "$LOCAL_DIR/$CERT_FILE"
     chmod 600 "$LOCAL_DIR/$KEY_FILE"
     
-    # 测试并重载 Nginx
-    nginx -t && systemctl reload nginx
+    # 测试并重载 Nginx，同时记录日志
+    if nginx -t > /dev/null 2>&1; then
+        systemctl reload nginx
+        logger -t sync_cert "SUCCESS: Nginx certificates updated and reloaded."
+    else
+        logger -t sync_cert "ERROR: Nginx config test failed. Certificate update aborted."
+        exit 1
+    fi
+else
+    # 即使没更新，也可以记录一条
+    logger -t sync_cert "INFO: Certificates are already up to date. No action taken."
 fi
 
 # 清理临时目录
