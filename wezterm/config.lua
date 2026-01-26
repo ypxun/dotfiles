@@ -26,6 +26,9 @@ config.font_size = is_mac and 13 or 11 -- Mac 用 13，Win 用 11 视觉上更�
 config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
 
+-- 确保允许终端程序设置剪贴板
+config.allow_terminal_set_clipboard = true
+
 -- --------------------------------------------------------------------
 -- 3. 主题自适应逻辑
 -- --------------------------------------------------------------------
