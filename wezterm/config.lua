@@ -27,7 +27,7 @@ config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
 
 -- 确保允许终端程序设置剪贴板
-config.allow_terminal_set_clipboard = true
+config.set_clipboard_to_local_clipboard = true
 
 -- --------------------------------------------------------------------
 -- 3. 主题自适应逻辑
