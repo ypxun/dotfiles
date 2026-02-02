@@ -15,6 +15,7 @@ fi
     {{- if stat .path_homebrew_bin }}
 # 注入 Homebrew 优化变量
 export HOMEBREW_AUTO_UPDATE_SECS=604800
+export HOMEBREW_NO_ENV_HINTS=1
 # 初始化 Homebrew Shell 环境
 eval "$({{ .path_homebrew_bin }} shellenv)"
     {{- end }}
