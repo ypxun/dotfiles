@@ -11,6 +11,7 @@ export RCLONE_CONFIG_{{ $remote }}_ACCESS_KEY_ID="{{ $bw.access_key.value }}"
 export RCLONE_CONFIG_{{ $remote }}_SECRET_ACCESS_KEY="{{ $bw.secret_key.value }}"
 export RCLONE_CONFIG_{{ $remote }}_ENDPOINT="{{ $bw.s3_endpoint.value }}"
 export RCLONE_CONFIG_{{ $remote }}_PATH_STYLE_ACCESS=true
+export RCLONE_CONFIG_{{ $remote }}_SIGN_ACCEPT_ENCODING=false
 
 # --- 3. 注入脚本逻辑需要的路径变量 ---
 export REMOTE_NAME="{{ $remote }}"
