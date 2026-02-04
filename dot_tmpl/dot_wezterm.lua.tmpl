@@ -1,1 +1,29 @@
+{{- /* 这里的 .osid 对应你在 .chezmoi.toml.tmpl 中定义的变量 */ -}}
+{{- $osid := .osid -}}
+local wezterm = require 'wezterm'
+local config = wezterm.config_builder()
+
+-- --------------------------------------------------------------------
+-- 1. 平台差异化注入 (Chezmoi 模板判断)
+-- --------------------------------------------------------------------
+{{ if eq $osid "darwin" -}}
+-- macOS 特有配置
+local mod = 'CMD'
+config.font_size = 13
+{{- else if eq $osid "windows" -}}
+-- Windows/WSL 特有配置
+local mod = 'ALT'
+config.font_size = 11
+config.default_prog = { 'wsl.exe', '-d', 'Arch', '--cd', '~' }
+config.launch_menu = {
+    { label = 'Arch Linux (Default)', args = { 'wsl.exe', '-d', 'Arch', '--cd', '~' } },
+    { label = 'Debian WSL', args = { 'wsl.exe', '-d', 'debian', '--cd', '~' } },
+    { label = 'PowerShell 7', args = { 'pwsh.exe' } },
+}
+{{- end }}
+
+-- --------------------------------------------------------------------
+-- 2. 引入共用 Lua 逻辑
+-- --------------------------------------------------------------------
+-- 使用 include 将 wezterm/config.lua 的内容直接粘贴到此处
 {{ include (joinPath .chezmoi.workingTree "wezterm/config.lua") }}
