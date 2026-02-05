@@ -26,7 +26,7 @@ local function get_appearance()
 end
 
 local function scheme_for_appearance(appearance)
-  return appearance:find 'Dark' and 'BlulocoDark' or 'BlulocoLight'
+  return appearance:find 'Dark' and 'Catppuccin Macchiato' or 'Catppuccin Latte'
 end
 
 config.color_scheme = scheme_for_appearance(get_appearance())
