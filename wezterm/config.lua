@@ -7,8 +7,8 @@ local act = wezterm.action
 -- --------------------------------------------------------------------
 -- 1. 基础布局与显示 (共用部分)
 -- --------------------------------------------------------------------
-config.initial_cols = 120
-config.initial_rows = 40
+config.initial_cols = 105
+config.initial_rows = 28
 config.font = wezterm.font_with_fallback({
    "JetBrainsMono Nerd Font",
    "JetBrains Mono",
