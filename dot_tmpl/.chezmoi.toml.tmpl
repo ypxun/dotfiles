@@ -25,7 +25,7 @@
     {{- else if eq .chezmoi.hostname "work_pkmbp" "work_pkpc" -}}
         {{- /* 在这里填入你公司电脑的主机名 */ -}}
         {{- $work = true -}}
-    {{- else if eq .chezmoi.hostname "debian" -}}
+    {{- else if eq .chezmoi.hostname "kr-oracle" -}}
         {{- $headless = true -}}
         {{- $personal = true -}}
     {{- else if stdinIsATTY -}}
