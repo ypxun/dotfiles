@@ -33,7 +33,7 @@ config.color_scheme = scheme_for_appearance(get_appearance())
 -- --------------------------------------------------------------------
 -- 3. 按键绑定 (Tmux 风格)
 -- --------------------------------------------------------------------
-config.leader = { key = '\\', mods = 'CTRL', timeout_milliseconds = 1000 }
+config.leader = { key = '\\', mods = 'CTRL', timeout_milliseconds = 100000 }
 config.keys = {
   -- 1. 逃逸：按两次 Ctrl+w 发送原始 Ctrl+w 给应用 (比如在 Vim 里使用)
   { key = '\\', mods = 'LEADER|CTRL', action = act.SendKey { key = '\\', mods = 'CTRL' } },
