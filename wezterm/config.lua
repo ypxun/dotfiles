@@ -40,16 +40,6 @@ config.keys = {
         mods = mod,
         action = act.CloseCurrentPane { confirm = false },
     },
-    {
-        key = 'd',
-        mods = mod,
-        action = act.SplitHorizontal { domain = 'CurrentPaneDomain' }
-    },
-    {
-        key = 'd',
-        mods = mod .. '|SHIFT',
-        action = act.SplitVertical { domain = 'CurrentPaneDomain' }
-    },
 }
 
 return config
