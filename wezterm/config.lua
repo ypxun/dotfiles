@@ -30,6 +30,28 @@ end
 
 config.color_scheme = scheme_for_appearance(get_appearance())
 
+-- 1. 定义重命名的具体动作 (这样可以多处复用)
+local rename_tab_action = act.PromptInputLine {
+  description = 'Enter new name for tab',
+  action = wezterm.action_callback(function(window, pane, line)
+    if line then
+      window:active_tab():set_title(line)
+    end
+  end),
+}
+
+-- 2. 添加到命令面板 (官方示例的功能：Ctrl+Shift+P 搜索可用)
+wezterm.on('augment-command-palette', function(window, pane)
+  return {
+    {
+      brief = 'Rename tab',
+      icon = 'md_rename_box',
+      action = rename_tab_action,
+    },
+  }
+end)
+
+
 -- --------------------------------------------------------------------
 -- 3. 按键绑定 (Tmux 风格)
 -- --------------------------------------------------------------------
@@ -57,6 +79,7 @@ config.keys = {
   -- 4. 标签页 (Tab) 管理
   { key = 'c', mods = 'LEADER',       action = act.SpawnTab 'CurrentPaneDomain' },
   { key = '&', mods = 'LEADER|SHIFT', action = act.CloseCurrentTab { confirm = true } },
+  { key = ',', mods = 'LEADER', action = rename_tab_action },
   
   -- 修正后的 ActivateTab 语法 (索引从 0 开始)
   { key = '1', mods = 'LEADER',       action = act.ActivateTab(0) },
