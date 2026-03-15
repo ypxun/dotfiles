@@ -54,6 +54,12 @@ eval "$(zoxide init zsh)"
 alias cd="z"
 {{- end }}
 
+# [OpenClaw] AI 命令行工具补全
+{{- $openclaw_path := joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh" -}}
+{{- if stat $openclaw_path }}
+source {{ $openclaw_path | quote }}
+{{- end }}
+
 # --- 3. 加载用户主体配置 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 
