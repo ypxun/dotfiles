@@ -75,3 +75,6 @@ augroup END
 if has('syntax') && has('eval')
   packadd! matchit
 endif
+
+" --- fzf ---
+set rtp+=/usr/local/opt/fzf
