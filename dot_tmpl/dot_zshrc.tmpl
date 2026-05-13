@@ -54,6 +54,17 @@ eval "$(zoxide init zsh)"
 alias cd="z"
 {{- end }}
 
+# [fnm] (Fast Node Manager)
+{{- $fnm_path := joinPath .chezmoi.homeDir ".local/share/fnm" -}}
+{{- if stat $fnm_path }}
+# 只有在检测到 fnm 安装目录存在时，才注入以下配置
+export FNM_PATH={{ $fnm_path | quote }}
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --shell zsh)"
+fi
+{{- end }}
+
 # [OpenClaw] AI 命令行工具补全
 {{- $openclaw_path := joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh" -}}
 {{- if stat $openclaw_path }}
