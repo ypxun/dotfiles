@@ -21,6 +21,10 @@ eval "$({{ .path_homebrew_bin }} shellenv)"
     {{- end }}
 {{- end }}
 
+# [Zsh 自定义补全目录注入]
+# 必须放在 Antidote 和 ez-compinit 加载之前！
+export fpath=("$HOME/.local/share/zsh/completions" $fpath)
+
 # [Antidote 插件管理器]
 {{- if .path_antidote | stat }}
 source {{ .path_antidote | quote }}
@@ -60,18 +64,6 @@ alias cd="z"
 export FNM_PATH={{ $fnm_path | quote }}
 export PATH="$FNM_PATH:$PATH"
 [[ ! "$PATH" == */fnm_multishells/* ]] && eval "$(fnm env --shell zsh)"
-{{- end }}
-
-# [OpenClaw] AI 命令行工具补全
-{{- $openclaw_path := joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh" -}}
-{{- if stat $openclaw_path }}
-source {{ $openclaw_path | quote }}
-{{- end }}
-
-# [Hermes Agent] 命令行工具补全
-{{- $hermes_path := joinPath .chezmoi.homeDir ".hermes/completions/hermes.zsh" -}}
-{{- if stat $hermes_path }}
-source {{ $hermes_path | quote }}
 {{- end }}
 
 # --- 3. 加载用户主体配置 (真身) ---

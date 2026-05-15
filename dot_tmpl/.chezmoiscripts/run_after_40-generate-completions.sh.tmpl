@@ -3,39 +3,32 @@ set -eufo pipefail
 
 echo "📝 [Post-Apply] 正在检查和更新命令补全环境..."
 
-# ==============================================================================
-# 核心生成函数
-# 参数 1: 命令名称 (如 hermes)
-# 参数 2: 补全文件存放的绝对路径
-# 参数 3及以后: 生成补全内容的完整命令 (如 hermes completion zsh)
-# ==============================================================================
+# 统一的 Zsh 补全存放目录
+ZSH_COMP_DIR="$HOME/.local/share/zsh/completions"
+mkdir -p "$ZSH_COMP_DIR"
+
 generate_completion() {
     local cmd_name="$1"
-    local comp_file="$2"
-    shift 2 # 移除前两个参数，剩下的 "$@" 就是生成命令
+    # 文件名必须以 _ 开头，例如 _hermes
+    local comp_file="$ZSH_COMP_DIR/_${cmd_name}"
+    shift 1
     local gen_cmd=("$@")
 
     local bin_path
-    # 1. 检查命令是否安装
     if ! bin_path="$(command -v "$cmd_name" 2>/dev/null)"; then
         echo "  ⏭️  [$cmd_name] 未安装，跳过。"
         return 0
     fi
 
-    # 2. 判断：如果文件不存在，或者二进制文件更新，则重新生成
     if [ ! -f "$comp_file" ] || [ "$bin_path" -nt "$comp_file" ]; then
-        echo "  ✨ [$cmd_name] 发现新版本或未初始化，重新生成 Zsh 补全..."
-        mkdir -p "$(dirname "$comp_file")"
+        echo "  ✨ [$cmd_name] 生成 Zsh 补全..."
         "${gen_cmd[@]}" > "$comp_file"
     else
-        echo "  ✅ [$cmd_name] 补全已是最新，跳过。"
+        echo "  ✅ [$cmd_name] 补全已是最新的。"
     fi
 }
 
-# ==============================================================================
-# 调用区：在这里一行添加一个工具
-# ==============================================================================
-generate_completion "hermes" "$HOME/.hermes/completions/hermes.zsh" hermes completion zsh
-generate_completion "openclaw" "$HOME/.openclaw/completions/openclaw.zsh" openclaw completion -s zsh
+generate_completion "hermes" hermes completion zsh
+generate_completion "openclaw" openclaw completion -s zsh
 
 echo "✨ 检查完毕！"
