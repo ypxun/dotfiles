@@ -68,6 +68,12 @@ export PATH="$FNM_PATH:$PATH"
 source {{ $openclaw_path | quote }}
 {{- end }}
 
+# [Hermes Agent] 命令行工具补全
+{{- $hermes_path := joinPath .chezmoi.homeDir ".hermes/completions/hermes.zsh" -}}
+{{- if stat $hermes_path }}
+source {{ $hermes_path | quote }}
+{{- end }}
+
 # --- 3. 加载用户主体配置 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 
