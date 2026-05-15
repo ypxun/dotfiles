@@ -1,0 +1,25 @@
+#!/bin/bash
+set -eufo pipefail
+
+echo "📝 [Post-Apply] 正在检查并维护 AI 工具的 Zsh 补全环境..."
+
+# 1. 全自动处理 Hermes 补全
+if command -v hermes &> /dev/null; then
+    echo "  ✨ 探测到 hermes，正在更新 Zsh 补全脚本..."
+    mkdir -p "$HOME/.hermes/completions"
+    hermes completion zsh > "$HOME/.hermes/completions/hermes.zsh"
+else
+    echo "  ⏭️  未检测到 hermes，跳过补全生成。"
+fi
+
+# 2. 全自动处理 OpenClaw 补全
+if command -v openclaw &> /dev/null; then
+    echo "  ✨ 探测到 openclaw，正在更新 Zsh 补全脚本..."
+    mkdir -p "$HOME/.openclaw/completions"
+    openclaw completion zsh > "$HOME/.openclaw/completions/openclaw.zsh" 
+else
+    echo "  ⏭️  未检测到 openclaw，跳过补全生成。"
+fi
+
+echo "✨ 补全环境全自动同步完毕！"
+{{ end -}}
