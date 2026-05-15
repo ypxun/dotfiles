@@ -59,7 +59,7 @@ alias cd="z"
 {{- if stat $fnm_path }}
 export FNM_PATH={{ $fnm_path | quote }}
 export PATH="$FNM_PATH:$PATH"
-eval "$(fnm env --shell zsh)"
+[[ ! "$PATH" == */fnm_multishells/* ]] && eval "$(fnm env --shell zsh)"
 {{- end }}
 
 # [OpenClaw] AI 命令行工具补全
