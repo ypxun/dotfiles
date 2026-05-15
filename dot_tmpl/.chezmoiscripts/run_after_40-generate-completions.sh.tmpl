@@ -16,7 +16,7 @@ fi
 if command -v openclaw &> /dev/null; then
     echo "  ✨ 探测到 openclaw，正在更新 Zsh 补全脚本..."
     mkdir -p "$HOME/.openclaw/completions"
-    openclaw completion zsh > "$HOME/.openclaw/completions/openclaw.zsh" 
+    openclaw completion -s zsh > "$HOME/.openclaw/completions/openclaw.zsh" 
 else
     echo "  ⏭️  未检测到 openclaw，跳过补全生成。"
 fi
