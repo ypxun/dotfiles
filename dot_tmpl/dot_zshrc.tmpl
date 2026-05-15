@@ -70,9 +70,12 @@ export PATH="$FNM_PATH:$PATH"
 {{- end }}
 
 # [OpenClaw] AI 命令行工具补全 (因工具自身的兼容性Bug，必须强制 Source)
-{{- $openclaw_path := joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh" -}}
-{{- if stat $openclaw_path }}
-source {{ $openclaw_path | quote }}
+{{- $openclaw_bin := lookPath "openclaw" -}}
+{{- if $openclaw_bin }}
+# 留个 Shell 检查，防止 run_after 脚本出错导致文件缺失时报错
+if [[ -f ~/.openclaw/completions/openclaw.zsh ]]; then
+    source ~/.openclaw/completions/openclaw.zsh
+fi
 {{- end }}
 
 # --- 3. 加载用户主体配置 (真身) ---
