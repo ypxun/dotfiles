@@ -37,18 +37,21 @@ fi
 {{- end }}
 
 # [Micromamba]
-# 使用 lookPath 在生成时检测，减少 Shell 启动时的 IO
 {{- $mamba_bin := lookPath "micromamba" | default (lookPath "mamba") -}}
 {{- if $mamba_bin }}
 export MAMBA_EXE={{ $mamba_bin | quote }}
 export MAMBA_ROOT_PREFIX="$HOME/mamba"
-eval "$({{ $mamba_bin | quote }} shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)"
+
+# 🚀 极速加载：直接 Source 预生成的静态 Hook，没有任何外部进程开销
+if [[ -f ~/.mamba_hook.zsh ]]; then
+    source ~/.mamba_hook.zsh
+fi
 
 # Mamba 环境快速切换函数
 mact() {
     local env
     env=$({{ $mamba_bin | quote }} env list | grep -v '^#' | grep -v '^$' | fzf --height 40% --reverse --header "Switch Env:" | awk '{print $1}')
-    [ -n "$env" ] && mamba activate "$env"
+    [ -n "$env" ] && {{ base $mamba_bin }} activate "$env"
 }
 {{- end }}
 

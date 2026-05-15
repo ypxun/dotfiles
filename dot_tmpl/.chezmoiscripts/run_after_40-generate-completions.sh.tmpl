@@ -41,4 +41,22 @@ generate_completion "hermes" "$ZSH_COMP_DIR/_hermes" hermes completion zsh
 # ------------------------------------------------------------------------------
 generate_completion "openclaw" "$HOME/.openclaw/completions/openclaw.zsh" openclaw completion -s zsh
 
+# ------------------------------------------------------------------------------
+# 3. [新增] Micromamba: 它是环境钩子 (包含补全和包装函数)，生成静态文件以供 Source
+# ------------------------------------------------------------------------------
+MAMBA_BIN="$(command -v micromamba 2>/dev/null || command -v mamba 2>/dev/null || true)"
+if [ -n "$MAMBA_BIN" ]; then
+    MAMBA_HOOK="$HOME/.mamba_hook.zsh"
+    # 判断逻辑跟补全一样：没文件，或者二进制文件更新了，就重新生成
+    if [ ! -f "$MAMBA_HOOK" ] || [ "$MAMBA_BIN" -nt "$MAMBA_HOOK" ]; then
+        echo "  ✨ [Micromamba] 发现新版本，生成静态 Shell Hook..."
+        "$MAMBA_BIN" shell hook --shell zsh --root-prefix "$HOME/mamba" > "$MAMBA_HOOK"
+    else
+        echo "  ✅ [Micromamba] 静态 Hook 已是最新的。"
+    fi
+else
+    echo "  ⏭️  [Micromamba] 未安装，跳过。"
+fi
+
+
 echo "✨ 检查完毕！"
