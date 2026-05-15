@@ -66,6 +66,12 @@ export PATH="$FNM_PATH:$PATH"
 [[ ! "$PATH" == */fnm_multishells/* ]] && eval "$(fnm env --shell zsh)"
 {{- end }}
 
+# [OpenClaw] AI 命令行工具补全 (因工具自身的兼容性Bug，必须强制 Source)
+{{- $openclaw_path := joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh" -}}
+{{- if stat $openclaw_path }}
+source {{ $openclaw_path | quote }}
+{{- end }}
+
 # --- 3. 加载用户主体配置 (真身) ---
 {{ include (joinPath .chezmoi.workingTree "zsh/zshrc") }}
 
