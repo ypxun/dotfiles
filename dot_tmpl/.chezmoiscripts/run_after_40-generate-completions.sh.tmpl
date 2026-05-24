@@ -3,11 +3,15 @@ set -eufo pipefail
 
 echo "📝 [Post-Apply] 正在检查和更新命令补全环境..."
 
+# 统一的 fpath 懒加载目录
+ZSH_COMP_DIR="$HOME/.local/share/zsh/completions"
+mkdir -p "$ZSH_COMP_DIR"
+
 # ==============================================================================
-# 核心生成函数
-# 参数 1: 命令名称 (如 hermes)
-# 参数 2: 补全文件存放的绝对路径
-# 参数 3及以后: 生成命令 (如 hermes completion zsh)
+# 泛用生成核心函数
+# 参数 1: 工具命令名 (如 kubectl)
+# 参数 2: 补全文件输出路径 (路径决定了它是懒加载还是强制source)
+# 参数 3~N: 具体的生成命令 (如 kubectl completion zsh)
 # ==============================================================================
 generate_completion() {
     local cmd_name="$1"
@@ -15,14 +19,40 @@ generate_completion() {
     shift 2
     local gen_cmd=("$@")
 
-    local bin_path
-    if ! bin_path="$(command -v "$cmd_name" 2>/dev/null)"; then
+    # 1. 检查是否安装
+    if ! command -v "$cmd_name" &>/dev/null; then
         echo "  ⏭️  [$cmd_name] 未安装，跳过。"
         return 0
     fi
 
-    if [ ! -f "$comp_file" ] || [ "$bin_path" -nt "$comp_file" ]; then
-        echo "  ✨ [$cmd_name] 生成 Zsh 补全..."
+    # 2. 尝试获取版本号快照
+    local current_version=""
+    current_version="$("$cmd_name" --version 2>&1 | head -n 1)" || true
+
+    # 3. 智能判定是否需要重新生成
+    local needs_update=false
+    
+    if [[ "$current_version" != *"unknown"* && -n "$current_version" ]]; then
+        # 方案 A: 拥有版本号 (彻底免疫 Node/Python 垫片更新问题)
+        local version_file="${comp_file}.version"
+        local cached_version=""
+        [ -f "$version_file" ] && cached_version="$(cat "$version_file")"
+
+        if [ ! -f "$comp_file" ] || [ "$current_version" != "$cached_version" ]; then
+            needs_update=true
+            echo "$current_version" > "$version_file" # 更新缓存
+        fi
+    else
+        # 方案 B: 无版本号，回退到判断二进制文件时间戳
+        local bin_path="$(command -v "$cmd_name")"
+        if [ ! -f "$comp_file" ] || [ "$bin_path" -nt "$comp_file" ]; then
+            needs_update=true
+        fi
+    fi
+
+    # 4. 执行生成
+    if [ "$needs_update" = true ]; then
+        echo "  ✨ [$cmd_name] 发现更新，重新生成 Zsh 补全..."
         mkdir -p "$(dirname "$comp_file")"
         "${gen_cmd[@]}" > "$comp_file"
     else
@@ -30,24 +60,26 @@ generate_completion() {
     fi
 }
 
-# ------------------------------------------------------------------------------
-# 1. Hermes: 乖孩子，放进统一的 fpath 目录，享受懒加载
-# ------------------------------------------------------------------------------
-ZSH_COMP_DIR="$HOME/.local/share/zsh/completions"
-generate_completion "hermes" "$ZSH_COMP_DIR/_hermes" hermes completion zsh
+# ==============================================================================
+# 工具注册区 (以后只需在这里添加一行即可)
+# ==============================================================================
 
-# ------------------------------------------------------------------------------
-# 2. OpenClaw: 熊孩子 (Cobra 框架 Bug)，放进私有目录，稍后在 zshrc 中强制 source
-# ------------------------------------------------------------------------------
+# 📌 类别 A：规范工具 (推荐)
+# 策略：输出到 $ZSH_COMP_DIR 且以 "_" 开头，享受 Zsh fpath 原生零延迟懒加载。
+generate_completion "hermes" "$ZSH_COMP_DIR/_hermes" hermes completion zsh
+# (举例) generate_completion "kubectl" "$ZSH_COMP_DIR/_kubectl" kubectl completion zsh
+
+# 📌 类别 B：不规范工具 (特例)
+# 策略：存在 Cobra 作用域 Bug 等问题，输出到工具私有目录，稍后在 .zshrc 中强制 source。
 generate_completion "openclaw" "$HOME/.openclaw/completions/openclaw.zsh" openclaw completion -s zsh
 
-# ------------------------------------------------------------------------------
-# 3. [新增] Micromamba: 它是环境钩子 (包含补全和包装函数)，生成静态文件以供 Source
-# ------------------------------------------------------------------------------
+
+# ==============================================================================
+# 特殊环境钩子 (包含环境变量修改，不可放入 fpath)
+# ==============================================================================
 MAMBA_BIN="$(command -v micromamba 2>/dev/null || command -v mamba 2>/dev/null || true)"
 if [ -n "$MAMBA_BIN" ]; then
     MAMBA_HOOK="$HOME/.mamba_hook.zsh"
-    # 判断逻辑跟补全一样：没文件，或者二进制文件更新了，就重新生成
     if [ ! -f "$MAMBA_HOOK" ] || [ "$MAMBA_BIN" -nt "$MAMBA_HOOK" ]; then
         echo "  ✨ [Micromamba] 发现新版本，生成静态 Shell Hook..."
         "$MAMBA_BIN" shell hook --shell zsh --root-prefix "$HOME/mamba" > "$MAMBA_HOOK"
@@ -57,6 +89,5 @@ if [ -n "$MAMBA_BIN" ]; then
 else
     echo "  ⏭️  [Micromamba] 未安装，跳过。"
 fi
-
 
 echo "✨ 检查完毕！"
