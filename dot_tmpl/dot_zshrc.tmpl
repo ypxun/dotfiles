@@ -69,7 +69,7 @@ export PATH="$FNM_PATH:$PATH"
 [[ ! "$PATH" == */fnm_multishells/* ]] && eval "$(fnm env --shell zsh)"
 {{- end }}
 
-# [OpenClaw] AI 命令行工具补全 (因工具自身的兼容性Bug，必须强制 Source)
+# OpenClaw Completion
 {{- $openclaw_bin := lookPath "openclaw" -}}
 {{- if $openclaw_bin }}
 # 留个 Shell 检查，防止 run_after 脚本出错导致文件缺失时报错

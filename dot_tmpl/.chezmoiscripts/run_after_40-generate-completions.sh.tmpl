@@ -16,7 +16,8 @@ mkdir -p "$ZSH_COMP_DIR"
 generate_completion() {
     local cmd_name="$1"
     local comp_file="$2"
-    shift 2
+    local output_mode="$3"
+    shift 3
     local gen_cmd=("$@")
 
     # 1. 检查是否安装
@@ -54,7 +55,13 @@ generate_completion() {
     if [ "$needs_update" = true ]; then
         echo "  ✨ [$cmd_name] 发现更新，重新生成 Zsh 补全..."
         mkdir -p "$(dirname "$comp_file")"
-        "${gen_cmd[@]}" > "$comp_file"
+        # 判断输出模式
+        if [ "$output_mode" = "STDOUT" ]; then
+            "${gen_cmd[@]}" > "$comp_file"
+        else
+            # 模式 B: 原生模式，工具自己会写文件到正确位置，我们只负责静默调用
+            "${gen_cmd[@]}"
+        fi
     else
         echo "  ✅ [$cmd_name] 补全已是最新的。"
     fi
@@ -66,13 +73,12 @@ generate_completion() {
 
 # 📌 类别 A：规范工具 (推荐)
 # 策略：输出到 $ZSH_COMP_DIR 且以 "_" 开头，享受 Zsh fpath 原生零延迟懒加载。
-generate_completion "hermes" "$ZSH_COMP_DIR/_hermes" hermes completion zsh
+generate_completion "hermes" "$ZSH_COMP_DIR/_hermes" "STDOUT" hermes completion zsh
 # (举例) generate_completion "kubectl" "$ZSH_COMP_DIR/_kubectl" kubectl completion zsh
 
 # 📌 类别 B：不规范工具 (特例)
 # 策略：存在 Cobra 作用域 Bug 等问题，输出到工具私有目录，稍后在 .zshrc 中强制 source。
-generate_completion "openclaw" "$HOME/.openclaw/completions/openclaw.zsh" openclaw completion -s zsh
-
+generate_completion "openclaw" "$HOME/.openclaw/completions/openclaw.zsh" "NATIVE" openclaw completion --write-state
 
 # ==============================================================================
 # 特殊环境钩子 (包含环境变量修改，不可放入 fpath)
