@@ -10,7 +10,7 @@ echo "🛠️  [2/3] 检查第三方生产力工具..."
 
 # 1. [Eza] Debian/Ubuntu 专用 (使用第三方源获取最新版)
 # 注意：script-10 中已特意跳过 eza 安装
-{{ if eq .osid "linux-debian" "linux-ubuntu" -}}
+{{ if eq .osid "linux-debian" "linux-ubuntu" "linux-linuxmint" -}}
 if ! command -v eza &> /dev/null; then
     echo "✨ 配置 Eza 第三方源..."
     {{ $sudo }}mkdir -p /etc/apt/keyrings

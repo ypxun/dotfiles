@@ -32,7 +32,7 @@ set -eufo pipefail
         {{- $target_pkg := $pkg -}}
         
         {{- /* 根据 OSID 进行名称转换 */ -}}
-        {{- if eq $.osid "linux-debian" "linux-ubuntu" -}}
+        {{- if eq $.osid "linux-debian" "linux-ubuntu" "linux-linuxmint" -}}
             {{- if hasKey $debian_map $pkg }}{{ $target_pkg = get $debian_map $pkg }}{{ end -}}
         {{- else if eq $.osid "linux-arch" -}}
             {{- if hasKey $arch_map $pkg }}{{ $target_pkg = get $arch_map $pkg }}{{ end -}}
@@ -46,7 +46,7 @@ set -eufo pipefail
 
 echo "📦 [Install] 同步系统软件包 ({{ .osid }})..."
 
-{{ if eq .osid "linux-debian" "linux-ubuntu" -}}
+{{ if eq .osid "linux-debian" "linux-ubuntu" "linux-linuxmint" -}}
     {{ $sudo }}apt update && {{ $sudo }}apt install -y {{ $packages | join " " }}
 {{ else if eq .osid "linux-arch" -}}
     {{ $sudo }}pacman -S --needed --noconfirm {{ $packages | join " " }}
