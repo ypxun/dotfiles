@@ -10,7 +10,8 @@ Host *
 # --- 个人 GitHub (仅个人机器) ---
 {{- if .personal }}
 Host github.com gist.github.com
-    HostName %h
+    HostName ssh.github.com
+    Post 443
     User git
     IdentityFile ~/.ssh/github_ypxun
 {{- end }}
