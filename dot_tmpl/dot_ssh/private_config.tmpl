@@ -11,7 +11,7 @@ Host *
 {{- if .personal }}
 Host github.com gist.github.com
     HostName ssh.github.com
-    Post 443
+    Port 443
     User git
     IdentityFile ~/.ssh/github_ypxun
 {{- end }}
