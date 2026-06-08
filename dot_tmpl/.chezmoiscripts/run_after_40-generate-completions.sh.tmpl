@@ -75,6 +75,9 @@ generate_completion() {
 # 策略：输出到 $ZSH_COMP_DIR 且以 "_" 开头，享受 Zsh fpath 原生零延迟懒加载。
 generate_completion "hermes" "$ZSH_COMP_DIR/_hermes" "STDOUT" hermes completion zsh
 # (举例) generate_completion "kubectl" "$ZSH_COMP_DIR/_kubectl" kubectl completion zsh
+# === 👇 uv 和 uvx 补全 👇 ===
+generate_completion "uv" "$ZSH_COMP_DIR/_uv" "STDOUT" uv generate-shell-completion zsh
+generate_completion "uvx" "$ZSH_COMP_DIR/_uvx" "STDOUT" uvx --generate-shell-completion zsh
 
 # 📌 类别 B：不规范工具 (特例)
 # 策略：存在 Cobra 作用域 Bug 等问题，输出到工具私有目录，稍后在 .zshrc 中强制 source。
