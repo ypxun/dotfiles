@@ -10,6 +10,7 @@ config.initial_rows = 28
 config.font = wezterm.font_with_fallback({
     "JetBrainsMono Nerd Font",
     "JetBrains Mono",
+    "Noto Sans Mono CJK SC"
 })
 
 config.window_decorations = 'RESIZE'
