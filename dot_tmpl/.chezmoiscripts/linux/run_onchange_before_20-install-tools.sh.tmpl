@@ -47,3 +47,13 @@ fi
 {{- else -}}
 echo "  ⏭️  Headless 模式，跳过 Micromamba/uv 安装。"
 {{- end }}
+
+# 3. [fnm] (Fast Node Manager) 官方一键安装
+# 无论是否是 Headless 环境，个人开发机都需要 Node 环境
+if ! command -v fnm &> /dev/null; then
+    echo "🚀 安装 fnm (Fast Node Manager)..."
+    # 注入 --skip-shell 是因为你的 dot_zshrc.tmpl 里已经手动写好了极其完美的 fnm 环境变量注入，不需要它的官方脚本去污染你的文件
+    curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
+else
+    echo "  ✅ fnm 已安装。"
+fi
