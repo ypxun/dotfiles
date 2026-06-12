@@ -31,6 +31,7 @@ Host gitlab.company.com
 
 # --- 个人 VPS 列表 (仅个人机器 & 有头模式/WSL) ---
 {{ if and .personal (or (not .headless) .is_wsl) }}
+{{  if .use_bw }}
 {{   range .vps_items }}
 {{-     $vps := (bitwarden "item" .) -}}
 {{-     $fields := (bitwardenFields "item" .) -}}
@@ -49,6 +50,12 @@ Host {{ $alias }}_root
     IdentityFile ~/.ssh/key_vps_root
 
 {{    end -}}
+
+{{ else }}
+# ⚠️ Bitwarden CLI 未就绪或未启用，已跳过动态 VPS 主机列表生成。
+# 💡 提示：请在系统初始化完毕、安装并登录 bw 后，重新运行 `chezmoi apply` 以补全 VPS 列表。
+  {{ end -}}
+
 {{- end -}}
 
 {{- end -}}
