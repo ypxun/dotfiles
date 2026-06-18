@@ -15,6 +15,7 @@ fd
 eza
 tmux
 unzip
+pipx
 
 # --- 生产力工具 (非无头设备) ---
 {{- if not .headless }}
