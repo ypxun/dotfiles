@@ -19,4 +19,4 @@
 2. **接入包管理**: 在 `.chezmoiscripts` 脚本中做逻辑判断。
 3. **规则过滤**: 在 `.chezmoiignore` 中针对新环境排除特定文件。
 
-**部分文件存在Bitwarden里，所以必须先手动安装bw cli并在本地解锁后，才能进行chezmoi的自动化操作。**
+**需先手动切换为zsh: `chsh -s $(command -v zsh)`**

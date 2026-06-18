@@ -19,4 +19,4 @@ To add a new OS (e.g., Fedora, Alpine):
 2. **Hook PKG Manager**: Extended for automation in the `.chezmoiscripts` scripts.
 3. **Filter Assets**: Use `.chezmoiignore` to exclude files if necessary.
 
-**Install Bitwarden CLI manually at the beginning or automation won't run.**
+**Change to zsh firstly: `chsh -s $(command -v zsh)`**
