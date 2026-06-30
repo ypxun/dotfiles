@@ -34,12 +34,17 @@ if [ ! -f "$LOCAL_DIR/$CERT_FILE" ] || [ "$(md5sum "$TMP_DIR/$CERT_FILE" | awk '
     chmod 644 "$LOCAL_DIR/$CERT_FILE"
     chmod 600 "$LOCAL_DIR/$KEY_FILE"
     
-    # 测试并重载 Nginx，同时记录日志
-    if nginx -t > /dev/null 2>&1; then
+    # 稍微歇个 0.5 秒，确保磁盘 I/O 写入和权限设置彻底完成
+    sleep 0.5
+
+    # 测试 Nginx 配置（不吞掉错误，或者如果测试失败，把错误写进 syslog）
+    NGINX_TEST_OUTPUT=$(nginx -t 2>&1)
+    if [ $? -eq 0 ]; then
         systemctl reload nginx
         logger -t sync_cert "SUCCESS: Nginx certificates updated and reloaded."
     else
-        logger -t sync_cert "ERROR: Nginx config test failed. Certificate update aborted."
+        # 这样下次如果再错，你可以在 journalctl 里直接看到 Nginx 到底为什么报错
+        logger -t sync_cert "CRITICAL: Nginx config test failed. Reason: $NGINX_TEST_OUTPUT"
         exit 1
     fi
 else
