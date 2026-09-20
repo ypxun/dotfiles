@@ -8,6 +8,7 @@ local act = wezterm.action
 config.initial_cols = 105
 config.initial_rows = 28
 config.font = wezterm.font_with_fallback({
+    "Maple Mono Normal NL NF CN",
     "JetBrainsMono Nerd Font",
     "JetBrains Mono",
     "Noto Sans Mono CJK SC"
