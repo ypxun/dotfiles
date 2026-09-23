@@ -1,63 +1,111 @@
-tap "daipeihust/tap"
-tap "felixkratz/formulae"
+tap "daipeihust/tap", trusted: true
+tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae", trusted: true
 tap "homebrew/cask"
 tap "homebrew/core"
 tap "homebrew/services"
-tap "laishulu/homebrew"
-tap "localsend/localsend"
-tap "mihomo-party-org/mihomo-party"
-tap "nikitabobko/tap"
+tap "laishulu/homebrew", trusted: true
+tap "localsend/localsend", trusted: true
+tap "nikitabobko/tap", trusted: true
+# Plugin manager for zsh, inspired by antigen and antibody
 brew "antidote"
+# Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
-brew "node"
-brew "bitwarden-cli"
+# Manage your dotfiles across multiple diverse machines, securely
 brew "chezmoi"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node"
+# Package acting as bridge between Node projects and their package managers
 brew "corepack"
+# Modern, maintained replacement for ls
 brew "eza"
+# Simple, fast and user-friendly alternative to find
 brew "fd"
+# Fast and simple Node.js version manager
+brew "fnm"
+# Command-line fuzzy finder written in Go
 brew "fzf"
+# GitHub command-line tool
 brew "gh"
+# Distributed revision control system
 brew "git"
+# Syntax-highlighting pager for git and diff output
 brew "git-delta"
+# Open source programming language to build simple/reliable/efficient software
 brew "go"
+# Lightweight and flexible command-line JSON processor
 brew "jq"
+# Fast Cross-Platform Package Manager
 brew "micromamba"
+# Another rule-based tunnel in Go, formerly known as ClashMeta
 brew "mihomo"
+# 'traceroute' and 'ping' in a single tool
 brew "mtr"
+# Rsync for cloud storage
 brew "rclone"
+# Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Terminal multiplexer
 brew "tmux"
+# Display directories as trees (with optional color/HTML output)
 brew "tree"
+# Extremely fast Python package installer and resolver, written in Rust
 brew "uv"
+# Shell extension to navigate your filesystem faster
 brew "zoxide"
+# A window border system for macOS
 brew "felixkratz/formulae/borders"
+# macOS Input Source Manager
 brew "laishulu/homebrew/macism"
+# AeroSpace is an i3-like tiling window manager for macOS
 cask "nikitabobko/tap/aerospace"
+# Android SDK component
 cask "android-platform-tools"
+# Virtual Audio Driver
 cask "blackhole-2ch"
+# Tool to list all active shortcuts of the current application
 cask "cheatsheet"
+# Automated testing of webapps for Google Chrome
 cask "chromedriver"
+# English dictionary
 cask "eudic"
+# Web browser
 cask "firefox"
 cask "font-jetbrains-mono"
 cask "font-jetbrains-mono-nerd-font"
 cask "font-meslo-lg-nerd-font"
+# Desktop client for GitHub repositories
 cask "github"
+# Web browser
 cask "google-chrome"
+# Desktop automation application
 cask "hammerspoon"
+# Utility to hide menu bar items
 cask "hiddenbar"
+# Menu bar calendar
 cask "itsycal"
+# Open-source cross-platform alternative to AirDrop
 cask "localsend"
+# File system integration
 cask "macfuse"
+# Tool to control external monitor brightness & volume
 cask "monitorcontrol"
+# Smooths scrolling and set mouse scroll directions independently
 cask "mos"
+# IDE for professional Python development
 cask "pycharm"
+# Peer to peer Bitorrent client
 cask "qbittorrent"
+# Instant messaging tool
 cask "qq"
+# Screenshot measurement and annotation tool
 cask "shottr"
+# Customizable email client
 cask "thunderbird"
+# Open-source code editor
 cask "visual-studio-code"
+# JavaScript IDE
 cask "webstorm"
+# GPU-accelerated cross-platform terminal emulator and multiplexer
 cask "wezterm@nightly"
 vscode "af4jm.vscode-m3u"
 vscode "ahmadalli.vscode-nginx-conf"
@@ -75,7 +123,6 @@ vscode "formulahendry.auto-close-tag"
 vscode "formulahendry.auto-rename-tag"
 vscode "formulahendry.code-runner"
 vscode "github.codespaces"
-vscode "github.copilot-chat"
 vscode "github.vscode-github-actions"
 vscode "grapecity.gc-excelviewer"
 vscode "humao.rest-client"
@@ -105,3 +152,4 @@ vscode "usernamehw.indent-one-space"
 vscode "viablelab.bracket-padder"
 vscode "vscodevim.vim"
 go "golang.org/x/tools/gopls"
+npm "@bitwarden/cli"
