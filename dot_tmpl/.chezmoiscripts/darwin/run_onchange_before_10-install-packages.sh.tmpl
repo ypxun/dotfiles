@@ -7,6 +7,7 @@ if command -v brew &> /dev/null; then
     echo "🍎 [1/3] macOS (Personal): 正在同步 Homebrew 状态..."
     # --no-upgrade 提速，--cleanup 保持纯净
     brew bundle --no-upgrade --file="{{ joinPath .chezmoi.workingTree "homebrew/Brewfile" }}"
+    brew bundle cleanup --force --file="{{ joinPath .chezmoi.workingTree "homebrew/Brewfile" }}"
 else
     echo "⚠️  未发现 Homebrew，请手动安装后再试。"
 fi
