@@ -13,3 +13,4 @@ zstyle ':autocomplete:*' widget-style menu-select
 alias cz="chezmoi"
 alias cze="chezmoi edit"
 alias cza="chezmoi apply"
+alias czu="chezmoi update"
