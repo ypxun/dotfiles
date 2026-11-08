@@ -81,7 +81,7 @@ generate_completion "uvx" "$ZSH_COMP_DIR/_uvx" "STDOUT" uvx --generate-shell-com
 
 # 📌 类别 B：不规范工具 (特例)
 # 策略：存在 Cobra 作用域 Bug 等问题，输出到工具私有目录，稍后在 .zshrc 中强制 source。
-generate_completion "openclaw" "$HOME/.openclaw/completions/openclaw.zsh" "NATIVE" openclaw completion --write-state
+# generate_completion "openclaw" "$HOME/.openclaw/completions/openclaw.zsh" "NATIVE" openclaw completion --write-state
 
 # ==============================================================================
 # 特殊环境钩子 (包含环境变量修改，不可放入 fpath)
