@@ -25,6 +25,6 @@ zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
 
 # 【核心变动】：把 autocomplete 放在最后，让它接管所有的输入控制
-marlonrichert/zsh-autocomplete
+marlonrichert/zsh-autocomplete pin:027cdab14451e98c9d36d72b1f79d9488ac88e46
 # 【核心变动】：语法高亮必须是最后加载的，因为它要给所有前面的东西上色
 zsh-users/zsh-syntax-highlighting
