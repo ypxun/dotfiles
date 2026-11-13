@@ -1,3 +1,5 @@
+# 保留先出现的项，重复 source 不会越叠越长
+typeset -U path PATH
 # --- 1. 第一优先级：P10K Instant Prompt ---
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
@@ -66,16 +68,8 @@ alias cd="z"
 {{- if stat $fnm_path }}
 export FNM_PATH={{ $fnm_path | quote }}
 export PATH="$FNM_PATH:$PATH"
-[[ ! "$PATH" == */fnm_multishells/* ]] && eval "$(fnm env --shell zsh)"
-{{- end }}
-
-# OpenClaw Completion
-{{- $openclaw_bin := lookPath "openclaw" -}}
-{{- if $openclaw_bin }}
-# 留个 Shell 检查，防止 run_after 脚本出错导致文件缺失时报错
-if [[ -f ~/.openclaw/completions/openclaw.zsh ]]; then
-    source ~/.openclaw/completions/openclaw.zsh
-fi
+path=(${path:#*/fnm_multishells/*}) 
+eval "$(fnm env --shell zsh)"  
 {{- end }}
 
 # --- 3. 加载用户主体配置 (真身) ---
